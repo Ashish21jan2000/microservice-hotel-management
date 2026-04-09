@@ -1,0 +1,16 @@
+## Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+ENV/
+
+## Streamlit
+.streamlit/secrets.toml
+
+## Data outputs (too large for GitHub)
+it_opss/outputs/
+it_opss/structured/**/*.csv
+

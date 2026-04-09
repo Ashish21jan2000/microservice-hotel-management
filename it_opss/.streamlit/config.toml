@@ -1,0 +1,12 @@
+# Reduces flaky "CONNECTING…" / washed-out UI on some corporate networks and VPNs.
+# See: https://docs.streamlit.io/develop/api-reference/configuration/config.toml
+
+[server]
+enableWebsocketCompression = false
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false
+
+[runner]
+fastReruns = true
