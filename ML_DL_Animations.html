@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML &amp; DL Animated Lab | Vision Shiksha Academy</title>
+<style>
+  :root{--bg:#0b1020;--panel:#121a33;--panel2:#18223f;--ink:#e2e8f0;--muted:#94a3b8;--acc:#38bdf8;--warn:#facc15}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+  .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+  aside{background:var(--panel);border-right:1px solid #1e293b;padding:14px 10px;overflow:auto;position:sticky;top:0;height:100vh}
+  .brand{font-weight:800;font-size:1.05rem;padding:4px 8px 10px;line-height:1.3}
+  .brand small{display:block;color:var(--muted);font-weight:500;font-size:.75rem}
+  .grp{margin:12px 0 4px;padding:0 8px;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .sc{display:flex;gap:6px;align-items:center;width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:.88rem;font-family:inherit}
+  .sc:hover{background:var(--panel2)}
+  .sc.on{background:linear-gradient(90deg,#1d4ed8,#7c3aed);color:#fff}
+  .sc .n{font-size:.7rem;opacity:.7;min-width:18px}
+  main{padding:14px 22px;min-width:0}
+  .top h1{margin:0;font-size:1.45rem}
+  .top p{margin:3px 0 10px;color:var(--muted)}
+  .stage{position:relative;background:#0f172a;border:1px solid #1e293b;border-radius:14px;overflow:hidden}
+  canvas{display:block;width:100%;height:auto}
+  .stage:fullscreen{display:flex;align-items:center;justify-content:center}
+  .stage:fullscreen canvas{width:min(100vw,calc(100vh*1100/560));height:auto}
+  .ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+  .ctrl button,.ctrl select,.ctrl input[type=text]{background:var(--panel2);color:var(--ink);border:1px solid #334155;border-radius:8px;padding:6px 11px;cursor:pointer;font-size:.86rem;font-family:inherit}
+  .ctrl input[type=text]{cursor:text}
+  .ctrl button:hover{border-color:var(--acc)}
+  .ctrl button.pri{background:#2563eb;border-color:#2563eb;font-weight:600;min-width:92px}
+  .ctrl label{font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .ctrl input[type=range]{accent-color:#38bdf8;width:110px}
+  .ctrl .sep{width:1px;height:26px;background:#334155;margin:0 4px}
+  .info{display:grid;grid-template-columns:1.5fr 1fr;gap:12px}
+  .narr,.keys{background:var(--panel);border:1px solid #1e293b;border-radius:12px;padding:12px 16px;font-size:.94rem;line-height:1.55}
+  .narr{min-height:84px;font-size:1.02rem}
+  .narr b{color:var(--warn)}
+  .keys h4{margin:0 0 6px;color:var(--acc)} .keys ul{margin:0;padding-left:18px}
+  .story{background:#1e1b4b;border:1px solid #4c1d95;border-radius:10px;padding:8px 12px;margin-bottom:10px}
+  .story h4{color:#fbbf24!important} .story p{margin:0}
+  .f{font-family:"Cambria Math",Cambria,serif;background:#0b1222;padding:0 6px;border-radius:6px;color:#a5f3fc}
+  .hint{color:var(--muted);font-size:.78rem;margin:12px 8px 0;line-height:1.7}
+  .hint a{color:var(--acc)}
+  kbd{background:#1e293b;border:1px solid #334155;border-radius:4px;padding:0 5px;font-size:.72rem}
+  @media(max-width:900px){.app{grid-template-columns:1fr}aside{position:static;height:auto}.info{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">🎬 ML &amp; DL Animated Lab<small>Vision Shiksha Academy</small></div>
+    <div id="menu"></div>
+    <div class="hint"><b>Shortcuts</b><br><kbd>Space</kbd> play / pause · <kbd>→</kbd> step<br><kbd>R</kbd> reset · <kbd>N</kbd>/<kbd>P</kbd> next / prev · <kbd>F</kbd> fullscreen</div>
+    <div class="hint"><a href="ML_DL_Notes.html">📘 Open the full notes</a></div>
+  </aside>
+  <main>
+    <div class="top"><h1 id="title"></h1><p id="sub"></p></div>
+    <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+    <div class="ctrl">
+      <button class="pri" id="bPlay">▶ Play</button>
+      <button id="bStep">⏭ Step</button>
+      <button id="bReset">↺ Reset</button>
+      <label>Speed <input type="range" id="speed" min="0.25" max="3" step="0.25" value="1"><span id="spv">1×</span></label>
+      <button id="bFull">⛶ Fullscreen</button>
+      <span class="sep"></span>
+      <span id="extra" style="display:contents"></span>
+    </div>
+    <div class="info"><div class="narr" id="narr"></div><div class="keys" id="keys"></div></div>
+  </main>
+</div>
+<script>
+/* ===================== ENGINE ===================== */
+const W=1100,H=560,TAU=Math.PI*2;
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+function fit(){const d=Math.max(1,window.devicePixelRatio||1);cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);}
+fit();addEventListener('resize',fit);
+const C={sky:'#38bdf8',pink:'#f472b6',yel:'#facc15',grn:'#4ade80',vio:'#a78bfa',org:'#fb923c',red:'#f87171',ink:'#e2e8f0',mut:'#94a3b8',dim:'#334155',bg:'#0f172a',pan:'#141d38',line:'#475569'};
+const PAL=[C.sky,C.pink,C.yel,C.grn,C.vio,C.org];
+const FONT='"Segoe UI","Nirmala UI","Noto Sans Devanagari",system-ui,sans-serif';
+function rgba(h,a){const n=parseInt(h.slice(1),16);return`rgba(${n>>16},${n>>8&255},${n&255},${a})`}
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const sig=z=>1/(1+Math.exp(-z));
+let seed=1;
+function rnd(){seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
+function randn(){let u=0;while(!u)u=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(TAU*rnd())}
+function circ(x,y,r,f,s,lw=1.5){ctx.beginPath();ctx.arc(x,y,Math.max(0,r),0,TAU);if(f){ctx.fillStyle=f;ctx.fill()}if(s){ctx.strokeStyle=s;ctx.lineWidth=lw;ctx.stroke()}}
+function ln(x1,y1,x2,y2,c,lw=1.5,dash){ctx.beginPath();ctx.setLineDash(dash||[]);ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.stroke();ctx.setLineDash([])}
+function arrow(x1,y1,x2,y2,c,lw=2,hs=9){ln(x1,y1,x2,y2,c,lw);const a=Math.atan2(y2-y1,x2-x1);ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-hs*Math.cos(a-.45),y2-hs*Math.sin(a-.45));ctx.lineTo(x2-hs*Math.cos(a+.45),y2-hs*Math.sin(a+.45));ctx.closePath();ctx.fillStyle=c;ctx.fill()}
+function rrPath(x,y,w,h,r){w=Math.max(w,0.1);h=Math.max(h,0.1);r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function rr(x,y,w,h,r,f,s,lw=1.5){rrPath(x,y,w,h,r);if(f){ctx.fillStyle=f;ctx.fill()}if(s){ctx.strokeStyle=s;ctx.lineWidth=lw;ctx.stroke()}}
+function tx(s,x,y,o={}){ctx.font=`${o.w||400} ${o.s||14}px ${o.f||FONT}`;ctx.fillStyle=o.c||C.ink;ctx.textAlign=o.a||'center';ctx.textBaseline=o.b||'middle';ctx.fillText(s,x,y)}
+function ga(a,fn){ctx.save();ctx.globalAlpha*=clamp(a,0,1);fn();ctx.restore()}
+function panel(x,y,w,h,title,col){rr(x,y,w,h,12,C.pan,'#1e293b',1);if(title)tx(title,x+14,y+18,{a:'left',s:13,w:700,c:col||C.mut})}
+function axes(x0,y0,x1,y1,xl,yl){ln(x0,y1,x1,y1,C.line,1.5);ln(x0,y0,x0,y1,C.line,1.5);if(xl)tx(xl,(x0+x1)/2,y1+18,{s:12,c:C.mut});if(yl){ctx.save();ctx.translate(x0-20,(y0+y1)/2);ctx.rotate(-Math.PI/2);tx(yl,0,0,{s:12,c:C.mut});ctx.restore()}}
+function heat(v,max=1){const t=clamp(Math.abs(v)/max,0,1);return v>=0?`rgba(56,189,248,${.12+.78*t})`:`rgba(244,114,182,${.12+.78*t})`}
+function softmax(a){const m=Math.max(...a);const e=a.map(v=>Math.exp(v-m));const s=e.reduce((x,y)=>x+y,0);return e.map(v=>v/s)}
+function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+
+const scenes=[];let S=null,idx=0,playing=false,speed=1,acc=0,last=performance.now(),T=0,tweens=[];
+const scene=o=>scenes.push(o);
+const ease=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+function tween(ms,upd,done){tweens.push({t:0,ms:Math.max(1,ms),upd,done})}
+function wait(ms,done){tween(ms,null,done)}
+const busy=()=>tweens.length>0;
+function runTw(dt){const cur=tweens;tweens=[];for(const w of cur){w.t+=dt;const p=Math.min(1,w.t/w.ms);if(w.upd)w.upd(ease(p),p);if(p<1)tweens.push(w);else if(w.done)w.done()}}
+function flush(){let g=0;while(tweens.length&&g++<400){const cur=tweens;tweens=[];for(const w of cur){if(w.upd)w.upd(1,1);if(w.done)w.done()}}}
+const narr=document.getElementById('narr');const say=h=>narr.innerHTML=h;
+const extra=document.getElementById('extra');
+function uiBtn(l,fn){const b=document.createElement('button');b.textContent=l;b.onclick=fn;extra.appendChild(b);return b}
+function uiRange(l,min,max,step,val,fn,fmt=v=>v){const L=document.createElement('label');L.append(l+' ');const i=document.createElement('input');i.type='range';i.min=min;i.max=max;i.step=step;i.value=val;const s=document.createElement('span');s.textContent=fmt(+val);i.oninput=()=>{s.textContent=fmt(+i.value);fn(+i.value)};L.append(i,s);extra.appendChild(L);return i}
+function uiCheck(l,val,fn){const L=document.createElement('label');const i=document.createElement('input');i.type='checkbox';i.checked=val;i.onchange=()=>fn(i.checked);L.append(i,' '+l);extra.appendChild(L);return i}
+function uiSelect(l,opts,val,fn){const L=document.createElement('label');L.append(l+' ');const s=document.createElement('select');for(const o of opts){const op=document.createElement('option');const[v,t]=Array.isArray(o)?o:[o,o];op.value=v;op.textContent=t;s.appendChild(op)}s.value=val;s.onchange=()=>fn(s.value);L.append(s);extra.appendChild(L);return s}
+function uiText(l,val,fn){const L=document.createElement('label');L.append(l+' ');const i=document.createElement('input');i.type='text';i.value=val;i.size=30;i.onchange=()=>fn(i.value);L.append(i);extra.appendChild(L);return i}
+function mapper(x0,y0,x1,y1,dx0,dx1,dy0,dy1){return{X:v=>x0+(v-dx0)/(dx1-dx0)*(x1-x0),Y:v=>y1-(v-dy0)/(dy1-dy0)*(y1-y0),iX:p=>dx0+(p-x0)/(x1-x0)*(dx1-dx0),iY:p=>dy0+(y1-p)/(y1-y0)*(dy1-dy0),x0,y0,x1,y1,in:(x,y)=>x>=x0&&x<=x1&&y>=y0&&y<=y1}}
+
+/* ===================== SCENES ===================== */
+
+/* ---------- 1. Supervised vs Unsupervised ---------- */
+scene({id:'intro',group:'Start here',icon:'🧭',short:'Supervised vs Unsupervised',
+title:'Supervised vs Unsupervised Learning',
+sub:'Same fruit data, two learners: one is given the answers (labels), the other must find the groups by itself.',gap:1500,
+story:'<b>Supervised</b> = a student learning with a teacher who shows the right answers. <b>Unsupervised</b> = sorting a box of mixed toys when nobody tells you their names — you just put similar ones together.',
+keys:['<b>Supervised</b> = data <b>with answers</b> (labels). The model learns to give the answer for new data.','<b>Unsupervised</b> = data <b>without answers</b>. The model finds groups / patterns on its own.','Example: spam filter (supervised) vs grouping customers by shopping habits (unsupervised).','Each dot = one fruit, placed by 2 measurements: weight and sweetness.'],
+FR:[{n:'🍎 Apple',c:'#f87171'},{n:'🍌 Banana',c:'#facc15'},{n:'🍇 Grape',c:'#a78bfa'}],
+GR:[1,2,0],GC:[C.grn,C.org,C.sky],
+init(){seed=11;const cs=[[.25,.3],[.74,.32],[.5,.76]];this.pts=[];
+  for(let c=0;c<3;c++)for(let i=0;i<22;i++)this.pts.push({x:clamp(cs[c][0]+randn()*.075,.03,.97),y:clamp(cs[c][1]+randn()*.075,.03,.97),c});
+  this.mu=cs.map((_,c)=>{const p=this.pts.filter(q=>q.c===c);return{x:p.reduce((s,q)=>s+q.x,0)/p.length,y:p.reduce((s,q)=>s+q.y,0)/p.length}});
+  this.ph=0;this.a1=0;this.a2=0;this.a3=0;this.q={x:.56,y:.6};this.qc=this.nearest(this.q);
+  say(this.msg[0]);},
+msg:['Both sides show the <b>same 66 fruits</b>. Each dot = one fruit, placed by its <b>weight</b> and <b>sweetness</b>. <b>Left</b>: every fruit comes with its name (the answer). <b>Right</b>: no names — just grey dots. Press <b>▶ Play</b>.',
+  '<b>Learning time!</b> Left: the model learns the <b>borders</b> between Apple, Banana and Grape (coloured areas). Right: there are no names, so the model simply makes <b>3 groups</b> of fruits that look similar.',
+  'A <b>new fruit (?)</b> arrives. Left says: “It is a <b>Grape</b>”. Right can only say: “It looks like <b>Group 1</b>” — a human must decide what Group 1 means.',
+  '<b>Remember:</b> Supervised = learn <b>with answers</b> → predict the answer. Unsupervised = <b>no answers</b> → find groups and patterns. Press <b>N</b> for the next animation.'],
+nearest(p){let b=0,bd=1e9;this.mu.forEach((m,i)=>{const d=(m.x-p.x)**2+(m.y-p.y)**2;if(d<bd){bd=d;b=i}});return b},
+step(){if(this.ph>=3)return'end';this.ph++;const k='a'+this.ph;tween(1300,p=>this[k]=p);say(this.msg[this.ph])},
+draw(){
+  const B=[{x0:60,y0:62,x1:510,y1:512},{x0:600,y0:62,x1:1050,y1:512}];
+  panel(25,12,510,536);panel(565,12,510,536);
+  tx('🧑‍🏫 SUPERVISED — data + labels',280,34,{s:16,w:700,c:C.sky});tx('🔍 UNSUPERVISED — data only',820,34,{s:16,w:700,c:C.grn});
+  const mp=(b,p)=>[b.x0+p.x*(b.x1-b.x0),b.y1-p.y*(b.y1-b.y0)];
+  const L=B[0],R=B[1];
+  if(this.a1>0){const s=15;for(let gx=L.x0;gx<L.x1;gx+=s)for(let gy=L.y0;gy<L.y1;gy+=s){const c=this.nearest({x:(gx+s/2-L.x0)/(L.x1-L.x0),y:(L.y1-gy-s/2)/(L.y1-L.y0)});ctx.fillStyle=rgba(this.FR[c].c,.17*this.a1);ctx.fillRect(gx,gy,s,s)}}
+  axes(L.x0,L.y0,L.x1,L.y1,'Weight →','Sweetness →');axes(R.x0,R.y0,R.x1,R.y1,'Weight →','Sweetness →');
+  this.mu.forEach((m,c)=>{const g=this.GR[c];const[x,y]=mp(R,m);ga(this.a1,()=>{circ(x,y,80,rgba(this.GC[g],.07),null);ctx.setLineDash([6,5]);circ(x,y,80,null,this.GC[g],2);ctx.setLineDash([]);tx('Group '+(g+1),x,y-92,{s:14,w:700,c:this.GC[g]})})});
+  for(const p of this.pts){let[x,y]=mp(L,p);circ(x,y,6,this.FR[p.c].c,'#0f172a',1);[x,y]=mp(R,p);circ(x,y,6,'#64748b','#0f172a',1);if(this.a1>0)circ(x,y,6,rgba(this.GC[this.GR[p.c]],this.a1))}
+  this.mu.forEach((m,c)=>{const[x,y]=mp(L,m);rr(x-44,y-100,88,24,12,'rgba(15,23,42,.85)');tx(this.FR[c].n,x,y-88,{s:13,w:700,c:this.FR[c].c})});
+  if(this.a2>0){const r=6+10*(1-this.a2)+4,sh=this.a2>.5;
+    let[x,y]=mp(L,this.q);circ(x,y,r,sh?this.FR[this.qc].c:'#fff','#fff',2.5);tx(sh?'':'?',x,y+1,{s:13,w:800,c:'#0f172a'});
+    if(sh){rr(x+16,y-14,190,28,8,'rgba(15,23,42,.92)',this.FR[this.qc].c);tx('Prediction: '+this.FR[this.qc].n,x+111,y,{s:13,w:700})}
+    [x,y]=mp(R,this.q);const g=this.GR[this.qc];circ(x,y,r,sh?this.GC[g]:'#fff','#fff',2.5);tx(sh?'':'?',x,y+1,{s:13,w:800,c:'#0f172a'});
+    if(sh){rr(x-236,y-14,220,28,8,'rgba(15,23,42,.92)',this.GC[g]);tx(`Belongs to Group ${g+1} (name unknown)`,x-126,y,{s:13,w:700})}}
+  if(this.a3>0)ga(this.a3,()=>{rr(150,470,800,62,14,'rgba(2,6,23,.92)',C.yel,2);tx('Supervised: learn from answers → predict the answer   |   Unsupervised: no answers → find groups',550,501,{s:16,w:700,c:C.yel})});
+}});
+
+/* ---------- 2. Linear Regression + Gradient Descent ---------- */
+scene({id:'linreg',group:'Supervised Learning',icon:'📈',short:'Linear Regression',
+title:'Linear Regression — drawing the best straight line',
+sub:'Goal: predict a house price from its size. The pink line starts flat and improves itself step by step.',gap:30,
+story:'Imagine placing a ruler on a page of dots. You keep <b>nudging</b> it a little until it passes as close as possible to all the dots. Each nudge is one step of <b>gradient descent</b>.',
+keys:['The model is just a line: <b>price = w × size + b</b> (w = slope, b = starting value).','Red dashed lines = <b>errors</b> (gap between real price and predicted price).','<b>Gradient descent</b>: after each step, move the line in the direction that makes the errors smaller.','<b>Learning rate</b> = size of each nudge. Too small → very slow. Too big → jumps around and fails. Try the dropdown!','👆 <b>Click on the graph</b> to add your own house.'],
+M:mapper(80,40,650,490,0,4,0,100),
+ui(){uiSelect('Learning rate',[['0.01','0.01 (very slow)'],['0.05','0.05 (slow)'],['0.1','0.1 (good)'],['0.16','0.16 (zig-zag)'],['0.2','0.2 (too big — fails!)']],String(this.lr),v=>{this.lr=+v;this.restart()});
+  uiCheck('Show errors',this.res,v=>this.res=v);uiBtn('🎲 New data',()=>{this.ds++;this.init()})},
+init(){this.lr=this.lr??0.1;this.res=this.res??true;this.ds=this.ds??3;seed=this.ds*97;this.pts=[];
+  for(let i=0;i<25;i++){const x=.5+rnd()*3;this.pts.push({x,y:clamp(20*x+10+randn()*6,2,98)})}this.surface();this.restart()},
+restart(){this.w=0;this.b=0;this.it=0;this.gw=0;this.gb=0;this.hist=[this.mse()];this.path=[[0,0]];this.state='run';
+  say(`The line starts <b>flat</b> — a very bad guess. The red dashed lines show how wrong it is for each house. Press <b>▶ Play</b> and watch the line learn by itself.`)},
+mse(w=this.w,b=this.b){let s=0;for(const p of this.pts){const e=p.y-(w*p.x+b);s+=e*e}return s/this.pts.length},
+best(){const n=this.pts.length;let mx=0,my=0;for(const p of this.pts){mx+=p.x/n;my+=p.y/n}let sxx=0,sxy=0;for(const p of this.pts){sxx+=(p.x-mx)**2;sxy+=(p.x-mx)*(p.y-my)}const w=sxy/sxx;return{w,b:my-w*mx}},
+surface(){const sw=345,sh=175;this.SW={x:715,y:345,w:sw,h:sh,w0:-5,w1:40,b0:-30,b1:50};const oc=document.createElement('canvas');oc.width=sw;oc.height=sh;const o=oc.getContext('2d'),im=o.createImageData(sw,sh);
+  this.opt=this.best();const jmin=Math.log(this.mse(this.opt.w,this.opt.b)),jmax=Math.log(this.mse(-5,50)+this.mse(40,-30));
+  for(let j=0;j<sh;j++)for(let i=0;i<sw;i++){const w=lerp(-5,40,i/sw),b=lerp(50,-30,j/sh);const t=clamp((Math.log(this.mse(w,b))-jmin)/(jmax-jmin),0,1);
+    let r=lerp(250,15,Math.min(1,t*4)),g=lerp(204,40,Math.min(1,t*1.6)),bl=lerp(21,90,Math.min(1,t*2.2));if((t*14)%1<.08){r+=40;g+=40;bl+=40}
+    const k=(j*sw+i)*4;im.data[k]=r;im.data[k+1]=g;im.data[k+2]=bl;im.data[k+3]=255}
+  o.putImageData(im,0,0);this.surf=oc},
+step(){if(this.state!=='run')return'end';const n=this.pts.length;let gw=0,gb=0;
+  for(const p of this.pts){const e=(this.w*p.x+this.b)-p.y;gw+=2*e*p.x/n;gb+=2*e/n}
+  this.gw=gw;this.gb=gb;this.w-=this.lr*gw;this.b-=this.lr*gb;this.it++;const m=this.mse();this.hist.push(m);this.path.push([this.w,this.b]);
+  if(!isFinite(m)||m>1e6){this.state='div';say(`⚠️ <b>Learning failed after ${this.it} steps!</b> The learning rate (${this.lr}) is too big: every nudge jumps <b>past</b> the best line and lands even further away. Choose a smaller learning rate.`);return'end'}
+  if(this.it>=3000||Math.abs(this.hist[this.hist.length-2]-m)<2e-5){this.state='done';say(`✅ <b>Done in ${this.it} steps!</b> The model learned: <b>price ≈ ${this.w.toFixed(1)} × size + ${this.b.toFixed(1)}</b>. The small errors left are because real prices are a bit random — no straight line can touch every dot.`);return'end'}
+  say(`Step <b>${this.it}</b> — the line tilts a little to reduce its mistakes. Average error is now <b>${m.toFixed(0)}</b> (smaller = better).`)},
+click(x,y){const M=this.M;if(!M.in(x,y))return;this.pts.push({x:M.iX(x),y:M.iY(y)});this.surface();this.opt=this.best();if(this.state!=='div')this.state='run';this.hist.push(this.mse());say('➕ You added a house! The error went up. Press <b>▶ Play</b> and the line will adjust to include it.')},
+draw(){const M=this.M;panel(20,12,665,536);
+  for(let v=0;v<=100;v+=20){ln(M.x0,M.Y(v),M.x1,M.Y(v),'#1e293b',1);tx(v,M.x0-10,M.Y(v),{s:11,c:C.mut,a:'right'})}
+  for(let v=0;v<=4;v++){ln(M.X(v),M.y0,M.X(v),M.y1,'#1e293b',1);tx(v,M.X(v),M.y1+12,{s:11,c:C.mut})}
+  axes(M.x0,M.y0,M.x1,M.y1);tx('House size (1000 sq ft) →',365,525,{s:12,c:C.mut});
+  ctx.save();ctx.translate(36,265);ctx.rotate(-Math.PI/2);tx('Price (₹ lakh) →',0,0,{s:12,c:C.mut});ctx.restore();
+  ctx.save();ctx.beginPath();ctx.rect(M.x0,M.y0,M.x1-M.x0,M.y1-M.y0);ctx.clip();
+  const fy=x=>clamp(this.w*x+this.b,-1e4,1e4);
+  if(this.state==='done')ln(M.X(0),M.Y(this.opt.b),M.X(4),M.Y(this.opt.w*4+this.opt.b),rgba(C.grn,.7),2,[6,6]);
+  if(this.res)for(const p of this.pts)ln(M.X(p.x),M.Y(p.y),M.X(p.x),M.Y(fy(p.x)),rgba(C.red,.7),1.3,[4,3]);
+  ln(M.X(0),M.Y(fy(0)),M.X(4),M.Y(fy(4)),C.pink,4);ctx.restore();
+  for(const p of this.pts)circ(M.X(p.x),M.Y(p.y),6,C.sky,'#0f172a',1.5);
+  rr(95,50,300,34,8,'rgba(2,6,23,.8)');tx(`price = ${this.w.toFixed(1)} × size + ${this.b.toFixed(1)}`,245,67,{s:16,w:700,c:C.pink});
+  // loss curve
+  panel(700,12,380,300,'Error after each step (should go down ↓)');const cx0=725,cx1=1060,cy0=45,cy1=270;axes(cx0,cy0,cx1,cy1,'step');
+  const h=this.hist,n=Math.max(50,h.length),fin=h.filter(v=>isFinite(v)&&v>0),lo=Math.log(Math.min(...fin))-.05,hi=Math.max(Math.log(Math.max(...fin)),lo+1);
+  ctx.beginPath();h.forEach((v,i)=>{const X=cx0+i/(n-1)*(cx1-cx0),Y=cy1-clamp((Math.log(Math.max(v,1e-9))-lo)/(hi-lo),0,1)*(cy1-cy0);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.strokeStyle=C.yel;ctx.lineWidth=2.5;ctx.stroke();
+  tx(`step ${this.it}`,1050,62,{a:'right',s:13,c:C.mut});tx(`error ${h[h.length-1]>1e5?'∞':h[h.length-1].toFixed(0)}`,1050,82,{a:'right',s:16,w:700,c:C.yel});
+  tx(`learning rate ${this.lr}`,1050,102,{a:'right',s:13,c:C.mut});
+  // error surface
+  const sw=this.SW;panel(700,318,380,230,'Error map — the dot walks downhill to ★');ctx.drawImage(this.surf,sw.x,sw.y);
+  const PX=w=>sw.x+(w-sw.w0)/(sw.w1-sw.w0)*sw.w,PY=b=>sw.y+(sw.b1-b)/(sw.b1-sw.b0)*sw.h;
+  ctx.save();ctx.beginPath();ctx.rect(sw.x,sw.y,sw.w,sw.h);ctx.clip();
+  ctx.beginPath();this.path.forEach(([w,b],i)=>{const X=PX(clamp(w,-1e4,1e4)),Y=PY(clamp(b,-1e4,1e4));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+  tx('★',PX(this.opt.w),PY(this.opt.b),{s:18,c:'#fff'});circ(PX(this.w),PY(this.b),5,C.pink,'#fff',2);ctx.restore();
+  tx('w →',sw.x+sw.w-14,sw.y+sw.h+12,{s:11,c:C.mut});tx('b ↑',sw.x-14,sw.y+10,{s:11,c:C.mut});
+}});
+
+/* ---------- 3. KNN ---------- */
+scene({id:'knn',group:'Supervised Learning',icon:'🎯',short:'K-Nearest Neighbours',
+title:'K-Nearest Neighbours (KNN) Classification',
+sub:'To classify a new point, look at its K closest neighbours and let them vote.',gap:800,
+story:'You move to a new street and want to guess which IPL team people there support. You ask your <b>5 nearest neighbours</b> — whatever most of them say, that is your guess. That is KNN!',
+keys:['KNN = “tell me who your neighbours are, and I’ll tell you who you are”.','3 steps: <b>measure distance</b> to every dot → keep the <b>K closest</b> → <b>majority vote</b>.','<b>K</b> = how many neighbours vote. Change it with the slider!','Small K → easily fooled by one odd dot. Very large K → too general.','👆 <b>Click anywhere</b> on the graph to place your own point.'],
+M:mapper(60,30,560,530,0,1,0,1),NM:['Blue','Pink','Yellow'],
+  ui(){uiRange('K (neighbours)',1,15,2,this.k,v=>{this.k=v;this.grid=null;if(this.q){this.vote();if(this.ph===3)this.explain()}});
+  uiCheck('Colour the whole map',this.reg,v=>this.reg=v);uiBtn('🎲 New data',()=>{this.ds++;this.init()})},
+init(){this.k=this.k??5;this.reg=this.reg??false;this.ds=this.ds??5;seed=this.ds*31;const cs=[[.3,.66],[.7,.68],[.5,.28]];this.pts=[];
+  for(let c=0;c<3;c++)for(let i=0;i<28;i++)this.pts.push({x:clamp(cs[c][0]+randn()*.12,.02,.98),y:clamp(cs[c][1]+randn()*.12,.02,.98),c});
+  this.q=null;this.ph=0;this.grid=null;this.la=this.ra=this.vb=0;
+  say('Each dot is an example whose answer we already know: <b>Blue</b>, <b>Pink</b> or <b>Yellow</b>. KNN does <b>no training</b> — it just remembers all the dots. Press <b>Step</b> to add a new unknown point, or <b>click</b> on the graph.')},
+place(q){this.q=q;this.d=this.pts.map((p,i)=>({i,d:Math.hypot(p.x-q.x,p.y-q.y)})).sort((a,b)=>a.d-b.d);this.vote();this.ph=1;this.la=this.ra=this.vb=0;
+  tween(700,p=>this.la=p);say('A new point <b>?</b> arrives — we don’t know its colour. <b>Step 1:</b> measure how far it is from <b>every</b> dot (grey lines).')},
+vote(){const k=Math.min(this.k,this.d.length),cnt=[0,0,0];this.nn=new Set();for(let j=0;j<k;j++){cnt[this.pts[this.d[j].i].c]++;this.nn.add(this.d[j].i)}
+  const mx=Math.max(...cnt);let win=0;for(let j=0;j<k;j++){const c=this.pts[this.d[j].i].c;if(cnt[c]===mx){win=c;break}}this.cnt=cnt;this.win=win},
+step(){if(!this.q||this.ph===3){this.place({x:.08+rnd()*.84,y:.08+rnd()*.84});return}
+  if(this.ph===1){this.ph=2;tween(900,p=>this.ra=p);say(`<b>Step 2:</b> keep only the <b>${this.k} closest</b> dots (inside the yellow circle). All other dots are ignored.`)}
+  else{this.ph=3;tween(800,p=>this.vb=p);this.explain()}},
+explain(){const c=this.cnt;say(`<b>Step 3:</b> the ${Math.min(this.k,this.d.length)} neighbours <b>vote</b> → Blue ${c[0]}, Pink ${c[1]}, Yellow ${c[2]}. Most votes wins: <b>${this.NM[this.win]}</b>! 🎉 Try moving the <b>K slider</b>, or click somewhere else.`)},
+click(x,y){if(!this.M.in(x,y))return;tweens=[];this.place({x:this.M.iX(x),y:this.M.iY(y)})},
+mkGrid(){const M=this.M,s=10,g=[];for(let x=M.x0;x<M.x1;x+=s)for(let y=M.y0;y<M.y1;y+=s){const px=M.iX(x+s/2),py=M.iY(y+s/2);
+  const ds=this.pts.map(p=>[(p.x-px)**2+(p.y-py)**2,p.c]).sort((a,b)=>a[0]-b[0]);const k=Math.min(this.k,ds.length),cnt=[0,0,0];for(let j=0;j<k;j++)cnt[ds[j][1]]++;
+  const mx=Math.max(...cnt);let c=0;for(let j=0;j<k;j++)if(cnt[ds[j][1]]===mx){c=ds[j][1];break}g.push({x,y,c})}this.grid=g},
+draw(){const M=this.M,q=this.q;panel(20,12,580,536);
+  if(this.reg){if(!this.grid)this.mkGrid();for(const g of this.grid){ctx.fillStyle=rgba(PAL[g.c],.17);ctx.fillRect(g.x,g.y,10,10)}}
+  axes(M.x0,M.y0,M.x1,M.y1,'Feature 1 →','Feature 2 →');
+  let qx,qy;
+  if(q){qx=M.X(q.x);qy=M.Y(q.y);const k=Math.min(this.k,this.d.length),kd=this.d[k-1].d;
+    this.d.forEach((o,j)=>{const p=this.pts[o.i],near=j<k&&this.ph>=2;const a=this.ph>=2?(j<k?lerp(.25,.9,this.ra):lerp(.25,.04,this.ra)):.25*this.la;
+      ln(qx,qy,M.X(p.x),M.Y(p.y),rgba(near?PAL[p.c]:'#94a3b8',a),near?2:1)});
+    if(this.ph>=2){ctx.setLineDash([6,5]);circ(qx,qy,kd*(M.x1-M.x0)*this.ra,rgba(C.yel,.06),C.yel,1.5);ctx.setLineDash([])}}
+  this.pts.forEach((p,i)=>{const dim=q&&this.ph>=2&&!this.nn.has(i);circ(M.X(p.x),M.Y(p.y),6,rgba(PAL[p.c],dim?lerp(1,.3,this.ra):1),'#0f172a',1);
+    if(q&&this.ph>=2&&this.nn.has(i))circ(M.X(p.x),M.Y(p.y),9.5,null,rgba('#ffffff',this.ra),1.5)});
+  if(q){const done=this.ph===3&&this.vb>.5;circ(qx,qy,10,done?PAL[this.win]:'#fff','#fff',3);if(!done)tx('?',qx,qy+1,{s:13,w:800,c:'#0f172a'})}
+  panel(615,12,465,536,'The closest neighbours');
+  if(!q)tx('Press Step / Play, or click on the plot',848,200,{s:14,c:C.mut});
+  if(q&&this.ph>=2){const k=Math.min(this.k,this.d.length);for(let j=0;j<k;j++){const p=this.pts[this.d[j].i],y=52+j*19;
+    ga(clamp(this.ra*k-j,0,1),()=>{tx('#'+(j+1),640,y,{a:'left',s:12,c:C.mut});circ(684,y,6,PAL[p.c]);tx(this.NM[p.c],698,y,{a:'left',s:13});tx('distance '+this.d[j].d.toFixed(2),820,y,{a:'left',s:13,c:C.mut})})}}
+  const vy=372;tx('Votes',640,vy,{a:'left',s:14,w:700,c:C.mut});
+  for(let c=0;c<3;c++){const y=vy+28+c*32;tx(this.NM[c],640,y,{a:'left',s:13,c:PAL[c]});rr(720,y-10,300,20,6,'#1e293b');
+    if(q&&this.ph>=3){const w=300*this.cnt[c]/Math.min(this.k,this.d.length)*this.vb;if(w>1)rr(720,y-10,w,20,6,PAL[c]);tx(String(this.cnt[c]),1032,y,{a:'left',s:13,w:700})}}
+  if(q&&this.ph>=3)ga(this.vb,()=>{rr(640,494,420,38,10,rgba(PAL[this.win],.18),PAL[this.win],2);tx(`Prediction → ${this.NM[this.win]}   (K = ${this.k})`,850,513,{s:16,w:700,c:PAL[this.win]})});
+}});
+
+/* ---------- 4. Decision Tree ---------- */
+const DOTB='<span style="color:#38bdf8">●</span>',DOTP='<span style="color:#f472b6">●</span>';
+scene({id:'tree',group:'Supervised Learning',icon:'🌳',short:'Decision Tree',
+title:'Decision Tree — learning by asking the best questions',
+sub:'A flowchart of yes/no questions. At every step the tree tries all possible questions and keeps the one that separates the colours best.',gap:600,
+story:'Like the game <b>“20 Questions”</b>: you first ask the question that splits the possibilities most cleanly (“Is it an animal?”), then keep asking until you are sure.',
+keys:['A decision tree = a <b>flowchart of yes/no questions</b>.','The yellow line tries <b>every possible question</b> and keeps the best one.','<b>Gini</b> = “how mixed is this group?” → 0 = pure (one colour only), 0.5 = totally mixed.','Too many questions (deep tree) = <b>memorising</b> the data instead of learning → overfitting.','<b>Random Forest</b> = many trees voting together → more accurate.'],
+M:mapper(55,30,545,520,0,1,0,1),
+ui(){uiRange('Max depth',1,4,1,this.md,v=>{this.md=v;this.init()});uiBtn('🎲 New data',()=>{this.ds++;this.init()})},
+init(){this.md=this.md??3;this.ds=this.ds??2;seed=this.ds*53;this.pts=[];
+  for(let i=0;i<90;i++){const x=rnd(),y=rnd();let c=x<.5?(y>.6?0:1):(y<.35?0:(x>.8?0:1));if(rnd()<.05)c=1-c;this.pts.push({x,y,c})}
+  const root=this.mk(this.pts.map((_,i)=>i),0,1,0,1,0,0);root.a=1;this.nodes=[root];this.queue=[root];this.sw=null;this.done=false;
+  say(`All 90 dots start together in one big group: ${root.cnt[0]} ${DOTB} blue and ${root.cnt[1]} ${DOTP} pink — very mixed (Gini = <b>${root.g.toFixed(2)}</b>). Press <b>Step</b>: the tree will search for the best first question.`)},
+mk(idx,x0,x1,y0,y1,d,pos){const cnt=[0,0];for(const i of idx)cnt[this.pts[i].c]++;const n=idx.length,g=n?1-(cnt[0]/n)**2-(cnt[1]/n)**2:0;
+  return{idx,x0,x1,y0,y1,d,pos,cnt,g,maj:cnt[1]>cnt[0]?1:0,split:null,a:0}},
+part(n,f,t){const L=[],R=[];for(const i of n.idx){const v=f?this.pts[i].y:this.pts[i].x;(v<t?L:R).push(i)}return[L,R]},
+wg(n,f,t){const[L,R]=this.part(n,f,t);const gi=a=>{if(!a.length)return 0;let c=0;for(const i of a)c+=this.pts[i].c;const p=c/a.length;return 1-p*p-(1-p)**2};
+  return{g:(L.length*gi(L)+R.length*gi(R))/n.idx.length,nl:L.length,nr:R.length}},
+best(n){let b=null;for(const f of[0,1]){const vs=[...new Set(n.idx.map(i=>f?this.pts[i].y:this.pts[i].x))].sort((a,b)=>a-b);
+  for(let j=0;j<vs.length-1;j++){const t=(vs[j]+vs[j+1])/2,r=this.wg(n,f,t);if(r.nl<3||r.nr<3)continue;if(!b||r.g<b.g-1e-12)b={f,t,g:r.g}}}
+  return b&&b.g<n.g-.005?b:null},
+step(){if(this.done)return'end';
+  while(this.queue.length){const n=this.queue.shift();if(n.d>=this.md||n.g<1e-9)continue;const b=this.best(n);if(!b)continue;this.animSplit(n,b);return}
+  this.done=true;const leaves=this.nodes.filter(n=>!n.split);let ok=0;for(const l of leaves)ok+=l.cnt[l.maj];
+  say(`🌳 <b>Tree finished!</b> It has ${leaves.length} final groups (called <b>leaves</b>) and gets <b>${(100*ok/this.pts.length).toFixed(0)}%</b> of the dots right. Each coloured area = one leaf’s answer. Try a bigger <b>max depth</b>: more questions fit these dots better, but the tree may start memorising random noise (overfitting).`);return'end'},
+animSplit(n,b){const sw={n,f:0,v:n.x0,g:null};this.sw=sw;
+  const run=(f,from,to,ms,done)=>{sw.f=f;tween(ms,(e,p)=>{sw.v=lerp(from,to,p);sw.g=this.wg(n,f,sw.v).g},done)};
+  say(`Group of ${n.idx.length} dots. Trying every question like “<b>Is x less than …?</b>” (yellow line). Watch the Gini number — lower means a cleaner split.`);
+  run(0,n.x0,n.x1,1200,()=>{say(`…now trying every question about <b>y</b> (“Is y less than …?”)…`);run(1,n.y0,n.y1,1200,()=>{
+    run(b.f,b.f?n.y1:n.x1,b.t,700,()=>{n.split=b;const[Li,Ri]=this.part(n,b.f,b.t);
+      const L=b.f?this.mk(Li,n.x0,n.x1,n.y0,b.t,n.d+1,n.pos*2):this.mk(Li,n.x0,b.t,n.y0,n.y1,n.d+1,n.pos*2);
+      const R=b.f?this.mk(Ri,n.x0,n.x1,b.t,n.y1,n.d+1,n.pos*2+1):this.mk(Ri,b.t,n.x1,n.y0,n.y1,n.d+1,n.pos*2+1);
+      n.L=L;n.R=R;this.nodes.push(L,R);this.queue.push(L,R);this.sw=null;tween(500,p=>{L.a=R.a=p});
+      say(`✅ Best question found: <b>“Is ${b.f?'y':'x'} &lt; ${b.t.toFixed(2)}?”</b> It splits the dots into two cleaner groups → Yes: ${L.cnt[0]} ${DOTB} / ${L.cnt[1]} ${DOTP} &nbsp; No: ${R.cnt[0]} ${DOTB} / ${R.cnt[1]} ${DOTP}. (Gini ${n.g.toFixed(2)} → <b>${b.g.toFixed(2)}</b>)`)})})})},
+draw(){const M=this.M;panel(15,12,560,536);
+  for(const n of this.nodes)if(!n.split&&n.idx.length){ctx.fillStyle=rgba(n.maj?C.pink:C.sky,.16*n.a);ctx.fillRect(M.X(n.x0),M.Y(n.y1),M.X(n.x1)-M.X(n.x0),M.Y(n.y0)-M.Y(n.y1))}
+  axes(M.x0,M.y0,M.x1,M.y1,'Feature 1 (x) →','Feature 2 (y) →');
+  for(const n of this.nodes)if(n.split){const s=n.split;if(s.f===0)ln(M.X(s.t),M.Y(n.y0),M.X(s.t),M.Y(n.y1),'#fff',2.5);else ln(M.X(n.x0),M.Y(s.t),M.X(n.x1),M.Y(s.t),'#fff',2.5)}
+  const sw=this.sw;for(const p of this.pts)circ(M.X(p.x),M.Y(p.y),5.5,p.c?C.pink:C.sky,'#0f172a',1);
+  if(sw){const n=sw.n,g=(sw.g??n.g).toFixed(3);ctx.strokeStyle=C.yel;ctx.lineWidth=1.5;ctx.strokeRect(M.X(n.x0),M.Y(n.y1),M.X(n.x1)-M.X(n.x0),M.Y(n.y0)-M.Y(n.y1));
+    if(sw.f===0){const X=M.X(sw.v);ln(X,M.Y(n.y0),X,M.Y(n.y1),C.yel,3,[8,5]);rr(X-52,M.Y(n.y1)+4,104,24,6,'rgba(2,6,23,.9)');tx('Gini '+g,X,M.Y(n.y1)+16,{s:12,w:700,c:C.yel})}
+    else{const Y=M.Y(sw.v);ln(M.X(n.x0),Y,M.X(n.x1),Y,C.yel,3,[8,5]);rr(M.X(n.x0)+4,Y-27,104,22,6,'rgba(2,6,23,.9)');tx('Gini '+g,M.X(n.x0)+56,Y-16,{s:12,w:700,c:C.yel})}}
+  panel(590,12,495,536,'The tree being built');
+  const X0=598,X1=1077,Y0=70,DY=110,pos=n=>[X0+(n.pos+.5)*(X1-X0)/2**n.d,Y0+n.d*DY];
+  for(const n of this.nodes)if(n.L){const[a,b]=pos(n);[[n.L,'yes'],[n.R,'no']].forEach(([ch,lab])=>{const[c,d]=pos(ch);ga(ch.a,()=>{ln(a,b+18,c,d-18,C.line,2);tx(lab,(a+c)/2+(lab==='yes'?-14:14),(b+d)/2,{s:11,c:C.mut})})})}
+  for(const n of this.nodes){const[x,y]=pos(n),w=Math.min(150,(X1-X0)/2**n.d-6),leaf=!n.split,cur=sw&&sw.n===n,col=n.maj?C.pink:C.sky;
+    ga(n.a,()=>{rr(x-w/2,y-18,w,36,8,leaf?rgba(col,.25):'#1e293b',cur?C.yel:(leaf?col:C.line),cur?2.5:1.5);if(w<40)return;const fs=w<80?10:12;
+      if(n.split)tx(`${n.split.f?'y':'x'} < ${n.split.t.toFixed(2)} ?`,x,y-6,{s:fs+1,w:700});else tx(w<80?`${n.cnt[0]} | ${n.cnt[1]}`:`blue ${n.cnt[0]} · pink ${n.cnt[1]}`,x,y-6,{s:fs,w:700,c:leaf?col:C.ink});
+      tx(w<80?`G ${n.g.toFixed(2)}`:`gini ${n.g.toFixed(2)} · ${n.idx.length} dots`,x,y+9,{s:fs-1,c:C.mut})})}
+  tx('Small boxes: blue | pink counts.   Gini 0 = pure group',610,535,{s:12,c:C.mut,a:'left'});
+}});
+
+/* ---------- 5. K-Means ---------- */
+scene({id:'kmeans',group:'Unsupervised Learning',icon:'🎨',short:'K-Means Clustering',
+title:'K-Means Clustering — step by step',
+sub:'No labels! K-Means repeats two simple steps — “join the nearest centre” and “move the centre to the middle” — until nothing changes.',gap:700,
+story:'A teacher says “make 3 teams”. She picks <b>3 captains at random</b>. Every student joins the <b>nearest captain</b>. Then each captain walks to the <b>middle of their team</b>. Students re-join the nearest captain… repeat until nobody switches teams.',
+keys:['K-Means makes <b>K groups</b> from data that has <b>no labels</b>.','① <b>Assign</b>: every dot takes the colour of its nearest centre (✖).','② <b>Move</b>: each ✖ moves to the middle of its dots.','Repeat until no dot changes colour → finished!','Don’t know K? Press <b>📉 Elbow method</b>.'],
+M:mapper(50,30,550,530,0,1,0,1),
+ui(){uiRange('K (groups)',2,6,1,this.k,v=>{this.k=v;this.restart()});uiBtn('🎯 New random centres',()=>this.restart());uiBtn('🎲 New data',()=>{this.ds++;this.init()});uiBtn('📉 Elbow method',()=>this.elbow())},
+init(){this.k=this.k??3;this.ds=this.ds??4;seed=this.ds*71;this.nb=3+(this.ds%2);const cs=[];let g=0;
+  while(cs.length<this.nb&&g++<5000){const c=[.18+rnd()*.64,.18+rnd()*.64];if(cs.every(d=>Math.hypot(d[0]-c[0],d[1]-c[1])>.3))cs.push(c)}
+  this.pts=[];for(const c of cs)for(let i=0;i<45;i++)this.pts.push({x:clamp(c[0]+randn()*.07,.02,.98),y:clamp(c[1]+randn()*.07,.02,.98),c:-1});
+  this.el=null;this.restart()},
+restart(){tweens=[];this.cen=[];const used=new Set();
+  while(this.cen.length<this.k){const i=Math.floor(rnd()*this.pts.length);if(used.has(i))continue;used.add(i);const p=this.pts[i];this.cen.push({x:p.x,y:p.y,trail:[[p.x,p.y]]})}
+  this.pts.forEach(p=>p.c=-1);this.ph='assign';this.it=0;this.wcss=[];this.flash=0;this.conv=false;this.ca=0;tween(500,p=>this.ca=p);
+  say(`${this.k} centres (✖) are placed at random. The dots are grey because we have <b>no labels</b> — nobody told us the groups. Press <b>Step</b>.`)},
+calcW(){let w=0;for(const p of this.pts){const c=this.cen[p.c];w+=(p.x-c.x)**2+(p.y-c.y)**2}return w},
+step(){if(this.conv)return'end';
+  if(this.ph==='assign'){let ch=0;for(const p of this.pts){let b=0,bd=1e9;this.cen.forEach((c,j)=>{const d=(c.x-p.x)**2+(c.y-p.y)**2;if(d<bd){bd=d;b=j}});if(p.c!==b)ch++;p.c=b}
+    this.it++;const w=this.calcW();this.flash=1;tween(900,p=>this.flash=1-p);this.ph='update';
+    if(ch===0&&this.it>1){this.conv=true;say(`✅ <b>Finished after ${this.it-1} rounds!</b> No dot changed colour, so the centres will not move any more. Try a different K, or press <b>New random centres</b> — a different start can give a different answer.`);return}
+    this.wcss.push(w);say(`Round ${this.it} — <b>① Assign</b>: every dot takes the colour of its nearest ✖ (${ch} dots changed colour). Group spread = <b>${w.toFixed(2)}</b> (smaller = tighter groups).`)}
+  else{this.cen.forEach((c,j)=>{const m=this.pts.filter(p=>p.c===j);c.px=c.x;c.py=c.y;c.tx=m.length?m.reduce((s,p)=>s+p.x,0)/m.length:c.x;c.ty=m.length?m.reduce((s,p)=>s+p.y,0)/m.length:c.y});
+    const mv=Math.max(...this.cen.map(c=>Math.hypot(c.tx-c.px,c.ty-c.py)));
+    tween(900,p=>{for(const c of this.cen){c.x=lerp(c.px,c.tx,p);c.y=lerp(c.py,c.ty,p)}},()=>{for(const c of this.cen)c.trail.push([c.x,c.y])});
+    this.ph='assign';say(`Round ${this.it} — <b>② Move</b>: each ✖ slides to the <b>middle</b> of its own dots (dashed trail).`)}},
+elbow(){const P=this.pts,res=[];for(let k=1;k<=8;k++){let best=1e9;for(let r=0;r<6;r++){let cen=[];for(let j=0;j<k;j++){const p=P[Math.floor(rnd()*P.length)];cen.push([p.x,p.y])}const lab=new Array(P.length).fill(0);
+    for(let it=0;it<30;it++){P.forEach((p,i)=>{let b=0,bd=1e9;cen.forEach((c,j)=>{const d=(c[0]-p.x)**2+(c[1]-p.y)**2;if(d<bd){bd=d;b=j}});lab[i]=b});
+      cen=cen.map((c,j)=>{let sx=0,sy=0,n=0;P.forEach((p,i)=>{if(lab[i]===j){sx+=p.x;sy+=p.y;n++}});return n?[sx/n,sy/n]:c})}
+    let w=0;P.forEach((p,i)=>{w+=(p.x-cen[lab[i]][0])**2+(p.y-cen[lab[i]][1])**2});best=Math.min(best,w)}res.push(best)}
+  this.el=res;say(`📉 <b>Elbow method</b>: more groups always makes the spread smaller, so we look for the <b>bend (the “elbow”)</b> — the point after which adding more groups doesn’t help much. This data was made from <b>${this.nb}</b> blobs — can you see the bend there? Yellow dot = your current K.`)},
+draw(){const M=this.M;panel(15,12,560,536);axes(M.x0,M.y0,M.x1,M.y1,'Feature 1 →','Feature 2 →');
+  if(this.flash>0)for(const p of this.pts)if(p.c>=0){const c=this.cen[p.c];ln(M.X(p.x),M.Y(p.y),M.X(c.x),M.Y(c.y),rgba(PAL[p.c],.55*this.flash),1)}
+  for(const p of this.pts)circ(M.X(p.x),M.Y(p.y),5.5,p.c<0?'#64748b':PAL[p.c],'#0f172a',1);
+  this.cen.forEach((c,j)=>{ctx.beginPath();c.trail.forEach(([x,y],i)=>i?ctx.lineTo(M.X(x),M.Y(y)):ctx.moveTo(M.X(x),M.Y(y)));ctx.lineTo(M.X(c.x),M.Y(c.y));
+    ctx.strokeStyle=rgba(PAL[j],.85);ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+    ga(this.ca,()=>{const X=M.X(c.x),Y=M.Y(c.y);circ(X,Y,14,'#0f172a',PAL[j],3);tx('✖',X,Y+1,{s:15,w:800,c:PAL[j]})})});
+  if(this.conv)tx('✅ Finished',M.x1-10,M.y0+10,{a:'right',s:16,w:700,c:C.grn});
+  panel(590,12,490,262,'Group spread (WCSS) after each round — goes down ↓');
+  const w=this.wcss;if(w.length){const x0=620,x1=1060,y0=55,y1=245,mx=Math.max(...w),n=Math.max(6,w.length);axes(x0,y0,x1,y1);
+    w.forEach((v,i)=>{const bw=(x1-x0)/n*.7,X=x0+(i+.15)*(x1-x0)/n,h=v/mx*(y1-y0-14);rr(X,y1-h,bw,h,4,C.vio);tx(v.toFixed(2),X+bw/2,y1-h-9,{s:11,c:C.mut});tx('round '+(i+1),X+bw/2,y1+11,{s:10,c:C.mut})})}
+  else tx('Press Step to start',835,150,{s:14,c:C.mut});
+  panel(590,286,490,262,'Elbow method — spread for K = 1 … 8 groups');
+  if(this.el){const x0=630,x1=1060,y0=325,y1=515,mx=this.el[0],X=i=>x0+10+i/7*(x1-x0-20),Y=v=>y1-v/mx*(y1-y0-10);axes(x0,y0,x1,y1);
+    ctx.beginPath();this.el.forEach((v,i)=>i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v)));ctx.strokeStyle=C.grn;ctx.lineWidth=2.5;ctx.stroke();
+    this.el.forEach((v,i)=>{const on=i+1===this.k;circ(X(i),Y(v),on?8:5,on?C.yel:C.grn);tx('K='+(i+1),X(i),y1+13,{s:11,c:C.mut})})}
+  else tx('Click “📉 Elbow method” to compute',835,420,{s:14,c:C.mut});
+}});
+
+/* ---------- 6. Hierarchical clustering ---------- */
+function hull(P){if(P.length<3)return P.slice();const p=P.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+  const lo=[],up=[];for(const q of p){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],q)<=0)lo.pop();lo.push(q)}
+  for(const q of p.reverse()){while(up.length>=2&&cr(up[up.length-2],up[up.length-1],q)<=0)up.pop();up.push(q)}up.pop();lo.pop();return lo.concat(up)}
+scene({id:'hier',group:'Unsupervised Learning',icon:'🌲',short:'Hierarchical Clustering',
+title:'Hierarchical (Agglomerative) Clustering',
+sub:'Start with every dot alone, then keep joining the two closest groups. The history of joins forms a tree called a dendrogram.',gap:900,
+story:'Like building a <b>family tree</b> backwards: first the two most similar people become a pair, then pairs join into families, families into clans… until everyone is in one big tree.',
+keys:['Start: every dot is its own group.','Each step: <b>join the two closest groups</b>.','The <b>dendrogram</b> (right) records every join. Taller link = the groups were further apart.','✂️ Cut the tree with a horizontal line → you get your groups. No need to choose K first!','<b>Linkage</b> = how we measure distance between two groups (closest dots, farthest dots, or average).'],
+M:mapper(45,50,505,510,0,1,0,1),
+ui(){uiSelect('Linkage',[['single','Single'],['complete','Complete'],['average','Average']],this.link,v=>{this.link=v;this.init()});uiBtn('🎲 New data',()=>{this.ds++;this.init()})},
+init(){this.link=this.link??'average';this.ds=this.ds??1;seed=this.ds*19;const cs=[[.25,.72],[.74,.74],[.5,.26]],L='ABCDEFGHIJKLMN';
+  this.pts=[];for(let i=0;i<14;i++){const c=cs[i%3];this.pts.push({x:clamp(c[0]+randn()*.09,.05,.95),y:clamp(c[1]+randn()*.09,.05,.95),n:L[i]})}
+  let cl=this.pts.map((p,i)=>({id:i,m:[i],h:0}));const merges=[];let nid=this.pts.length;
+  const dist=(a,b)=>{const ds=[];for(const i of a.m)for(const j of b.m)ds.push(Math.hypot(this.pts[i].x-this.pts[j].x,this.pts[i].y-this.pts[j].y));
+    return this.link==='single'?Math.min(...ds):this.link==='complete'?Math.max(...ds):ds.reduce((s,v)=>s+v,0)/ds.length};
+  while(cl.length>1){let bi=0,bj=1,bd=1e9;for(let i=0;i<cl.length;i++)for(let j=i+1;j<cl.length;j++){const v=dist(cl[i],cl[j]);if(v<bd){bd=v;bi=i;bj=j}}
+    const nc={id:nid++,m:[...cl[bi].m,...cl[bj].m],h:bd,a:cl[bi],b:cl[bj]};merges.push(nc);cl=cl.filter((_,k)=>k!==bi&&k!==bj);cl.push(nc)}
+  this.merges=merges;this.root=merges[merges.length-1];const order=[];const walk=n=>{if(!n.a){order.push(n.id);return}walk(n.a);walk(n.b)};walk(this.root);this.order=order;
+  this.k=0;this.ma=1;this.cut=null;this.ca=0;
+  say('14 dots with <b>no labels</b>. At the start <b>every dot is its own group</b> (14 groups). Press <b>Step</b> to join the two closest groups.')},
+clustersAt(k){let cl=this.pts.map((p,i)=>({id:i,m:[i],h:0}));for(let i=0;i<k;i++){const g=this.merges[i];cl=cl.filter(c=>c.id!==g.a.id&&c.id!==g.b.id);cl.push(g)}return cl},
+step(){const n=this.pts.length;
+  if(this.k<this.merges.length){const g=this.merges[this.k++];this.ma=0;tween(800,p=>this.ma=p);
+    const nm=c=>'{'+c.m.map(i=>this.pts[i].n).join(',')+'}';
+    say(`Join #${this.k}: ${nm(g.a)} + ${nm(g.b)} were the closest → they become one group. <b>${n-this.k}</b> group${n-this.k>1?'s':''} left. A new link appears in the tree (its height = how far apart they were).`);return}
+  if(this.cut===null){const m=this.merges;this.cutH=(m[n-4].h+m[n-3].h)/2;this.cut=0;this.groups=this.clustersAt(n-3);tween(1200,p=>this.cut=p);
+    say(`✂️ <b>Cut the tree</b> with the red line → it crosses 3 vertical lines → <b>3 groups</b>! Cut lower → more groups; cut higher → fewer groups.`);return}
+  return'end'},
+draw(){const M=this.M,n=this.pts.length;panel(15,12,520,536);axes(M.x0,M.y0,M.x1,M.y1,'Feature 1 →','Feature 2 →');
+  const cl=this.clustersAt(this.k),newest=this.k?this.merges[this.k-1]:null,P=i=>[M.X(this.pts[i].x),M.Y(this.pts[i].y)];
+  const gcol=i=>{if(!this.groups||this.cut<.99)return null;const g=this.groups.findIndex(c=>c.m.includes(i));return PAL[g]};
+  const cutDone=this.cut!==null&&this.cut>.99,shown=cutDone?this.groups:cl;
+  shown.forEach((c,gi)=>{if(c.m.length<2)return;const h=hull(c.m.map(P)),col=cutDone?PAL[gi]:PAL[c.id%6],a=c===newest&&!cutDone?this.ma:1;
+    ga(a,()=>{ctx.beginPath();h.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.lineJoin='round';ctx.lineWidth=30;ctx.strokeStyle=rgba(col,.22);ctx.stroke();ctx.fillStyle=rgba(col,.22);ctx.fill();ctx.lineJoin='miter'})});
+  if(newest&&this.ma<1){const ca=newest.a.m.map(P),cb=newest.b.m.map(P),av=a=>[a.reduce((s,p)=>s+p[0],0)/a.length,a.reduce((s,p)=>s+p[1],0)/a.length];const[ax,ay]=av(ca),[bx,by]=av(cb);ln(ax,ay,bx,by,rgba(C.yel,1-this.ma),3)}
+  this.pts.forEach((p,i)=>{const[x,y]=P(i);circ(x,y,11,gcol(i)||'#cbd5e1','#0f172a',1.5);tx(p.n,x,y+1,{s:11,w:700,c:'#0f172a'})});
+  panel(550,12,535,536,'Dendrogram (the join history)');
+  const DX0=575,DX1=1065,DY0=70,DY1=480,hm=this.root.h,X={},Y=h=>DY1-h/hm*(DY1-DY0);
+  this.order.forEach((id,j)=>X[id]=DX0+(j+.5)*(DX1-DX0)/n);const xo=c=>X[c.id]??(X[c.id]=(xo(c.a)+xo(c.b))/2);
+  ln(DX0-8,DY0,DX0-8,DY1,C.line,1);for(let t=0;t<=4;t++){const h=hm*t/4;tx(h.toFixed(2),DX0-12,Y(h),{a:'right',s:10,c:C.mut})}
+  for(let i=0;i<this.k;i++){const g=this.merges[i],xa=xo(g.a),xb=xo(g.b),ya=Y(g.a.h),yb=Y(g.b.h),yg=Y(g.h),cur=g===newest,col=cur?C.yel:'#cbd5e1',p=cur?this.ma:1;
+    ln(xa,ya,xa,lerp(ya,yg,p),col,2.5);ln(xb,yb,xb,lerp(yb,yg,p),col,2.5);if(p>.98)ln(xa,yg,xb,yg,col,2.5)}
+  this.order.forEach(id=>{tx(this.pts[id].n,X[id],DY1+16,{s:13,w:700,c:gcol(id)||C.ink})});
+  if(this.cut!==null){const yc=lerp(DY0-10,Y(this.cutH),this.cut);ln(DX0-10,yc,DX1,yc,C.red,2.5,[8,6]);tx('cut',DX1-14,yc-11,{s:12,w:700,c:C.red})}
+  tx(`${this.link} linkage · ${n-this.k} group${n-this.k>1?'s':''}`,DX1,32,{a:'right',s:12,c:C.mut});
+}});
+
+/* ---------- 7. PCA ---------- */
+scene({id:'pca',group:'Unsupervised Learning',icon:'🧭',short:'PCA',
+title:'Principal Component Analysis (PCA)',
+sub:'Too many features? PCA finds the direction where the data is most spread out and keeps only that — fewer numbers, little information lost.',gap:900,
+story:'Like taking a <b>photo</b> of a 3-D object: you choose the camera angle that shows the <b>most detail</b>. PCA chooses the “angle” (direction) where the dots are most spread out, so we can describe each dot with fewer numbers.',
+keys:['PCA <b>reduces</b> many features to a few, keeping most of the information.','<b>PC1</b> = the direction where the dots are <b>most spread out</b>.','<b>PC2</b> = at 90° to PC1, holds the leftover spread.','Here: 2 features → 1 feature, while keeping 90%+ of the information.','Used to speed up models and to draw high-dimensional data in 2-D.'],
+O:[320,285],SC:58,
+ui(){uiBtn('🎲 New data',()=>{this.ds++;this.init()})},
+init(){this.ds=this.ds??8;seed=this.ds*13;const th=.35+rnd()*.6,ox=1.6,oy=1.1;this.pts=[];
+  for(let i=0;i<90;i++){const t=clamp(randn()*1.35,-3.3,3.3),s=randn()*.42;this.pts.push({ox:ox+t*Math.cos(th)-s*Math.sin(th),oy:oy+t*Math.sin(th)+s*Math.cos(th)})}
+  const n=this.pts.length,mx=this.pts.reduce((s,p)=>s+p.ox,0)/n,my=this.pts.reduce((s,p)=>s+p.oy,0)/n;this.mean=[mx,my];
+  for(const p of this.pts){p.cx=p.ox-mx;p.cy=p.oy-my}
+  let sxx=0,syy=0,sxy=0;for(const p of this.pts){sxx+=p.cx*p.cx/n;syy+=p.cy*p.cy/n;sxy+=p.cx*p.cy/n}
+  let a=.5*Math.atan2(2*sxy,sxx-syy);if(a<0)a+=Math.PI;this.th=a;const tr=sxx+syy,dt=Math.sqrt((sxx-syy)**2/4+sxy*sxy);this.l1=tr/2+dt;this.l2=tr/2-dt;
+  this.vc=[];for(let i=0;i<=180;i++)this.vc.push(this.varAt(i*Math.PI/180));
+  this.ph=0;this.cen=0;this.ang=null;this.smax=-1;this.pc2=0;this.proj=0;this.rot=0;
+  say('Each dot has <b>2 features</b> (think: height and weight). They lie along a diagonal, so the two features are related — they partly say the same thing. Can we describe each dot with just <b>one</b> number? Press <b>Step</b>.')},
+varAt(a){const c=Math.cos(a),s=Math.sin(a);let v=0;for(const p of this.pts){const z=p.cx*c+p.cy*s;v+=z*z}return v/this.pts.length},
+pos(p){let x=lerp(p.ox,p.cx,this.cen),y=lerp(p.oy,p.cy,this.cen);
+  if(this.proj>0){const c=Math.cos(this.th),s=Math.sin(this.th),z=p.cx*c+p.cy*s;x=lerp(x,z*c,this.proj);y=lerp(y,z*s,this.proj)}
+  if(this.rot>0){const f=this.rTarget*this.rot,c=Math.cos(f),s=Math.sin(f);[x,y]=[x*c-y*s,x*s+y*c]}return[x,y]},
+step(){this.ph++;const d=x=>(x*180/Math.PI).toFixed(0)+'°';
+  switch(this.ph){
+  case 1:tween(1200,p=>this.cen=p);say('Step 1 — <b>Move the data to the centre</b> (the ✚ slides to the middle of the graph). This just makes the next steps easier.');break;
+  case 2:this.ang=0;tween(3200,(e,p)=>{this.ang=p*Math.PI;this.smax=Math.round(p*180)},()=>{const a0=Math.PI;tween(900,p=>this.ang=lerp(a0,this.th,p))});
+    say('Step 2 — <b>Try every direction</b>: a line spins around. Every dot drops a “shadow” onto the line (yellow dots). The chart on the right shows <b>how spread out</b> the shadows are for each angle.');break;
+  case 3:tween(900,p=>this.pc2=p);say(`Step 3 — The direction with the <b>most spread</b> is <b>PC1</b> (pink). <b>PC2</b> (green) is at 90°. PC1 keeps <b>${(100*this.l1/(this.l1+this.l2)).toFixed(0)}%</b> of the information, PC2 only ${(100*this.l2/(this.l1+this.l2)).toFixed(0)}%.`);break;
+  case 4:tween(1400,p=>this.proj=p);say('Step 4 — <b>Squash</b> every dot onto PC1. The thin red lines show the small bit of information we throw away.');break;
+  case 5:this.rTarget=this.th>Math.PI/2?Math.PI-this.th:-this.th;tween(1500,p=>this.rot=p);say(`Step 5 — PC1 becomes the new axis. Now each dot is described by <b>just one number</b>. We went from 2 features → 1 and kept <b>${(100*this.l1/(this.l1+this.l2)).toFixed(0)}%</b> of the information. ✅`);break;
+  default:this.ph=5;return'end'}},
+draw(){const[OX,OY]=this.O,SC=this.SC,X=x=>OX+x*SC,Y=y=>OY-y*SC;panel(15,12,600,536);
+  ctx.save();rrPath(15,12,600,536,12);ctx.clip();
+  for(let g=-6;g<=6;g++){ln(X(g),20,X(g),540,'#1a2544',1);ln(20,Y(g),610,Y(g),'#1a2544',1)}
+  ln(25,OY,605,OY,C.line,1.5);ln(OX,20,OX,540,C.line,1.5);tx('Feature 1',598,OY-10,{a:'right',s:11,c:C.mut});tx('Feature 2',OX+6,28,{a:'left',s:11,c:C.mut});
+  const line=(a,col,lw,lab)=>{const c=Math.cos(a),s=Math.sin(a);ln(X(-6*c),Y(-6*s),X(6*c),Y(6*s),col,lw);if(lab)tx(lab,X(4.3*c),Y(4.3*s)-14,{s:14,w:800,c:col})};
+  if(this.ang!==null&&this.proj===0){const a=this.ang,c=Math.cos(a),s=Math.sin(a);
+    for(const p of this.pts){const z=p.cx*c+p.cy*s;ln(X(p.cx),Y(p.cy),X(z*c),Y(z*s),'rgba(250,204,21,.18)',1);circ(X(z*c),Y(z*s),3,C.yel)}}
+  if(this.proj>0){const c=Math.cos(this.th),s=Math.sin(this.th);if(this.rot===0)for(const p of this.pts){const z=p.cx*c+p.cy*s;ln(X(p.cx),Y(p.cy),X(z*c),Y(z*s),rgba(C.red,.35*this.proj),1)}}
+  if(this.pc2>0&&this.rot===0)ga(this.pc2*(1-this.proj*.6),()=>line(this.th+Math.PI/2,C.grn,2,'PC2'));
+  if(this.ang!==null){const a=this.rot>0?this.th+this.rTarget*this.rot:this.ang;line(a,this.ph>=3?C.pink:C.org,3,this.ph>=3?'PC1':null)}
+  for(const p of this.pts){const[x,y]=this.pos(p);circ(X(x),Y(y),4.5,C.sky,'#0f172a',1)}
+  const[mx,my]=this.mean;tx('✚',X(lerp(mx,0,this.cen)),Y(lerp(my,0,this.cen)),{s:22,w:800,c:'#fff'});
+  if(this.rot>.99){for(let t=-4;t<=4;t++){ln(X(t),OY-6,X(t),OY+6,'#fff',1.5);tx(t,X(t),OY+18,{s:11,c:C.mut})}tx('PC1 score (new single feature)',OX,OY+40,{s:14,w:700,c:C.pink})}
+  ctx.restore();
+  panel(630,12,450,300,'How spread out are the shadows? (every angle)');const x0=660,x1=1060,y0=50,y1=270,vm=Math.max(...this.vc);axes(x0,y0,x1,y1,'angle of the spinning line (0° → 180°)');
+  if(this.smax>=0){ctx.beginPath();for(let i=0;i<=this.smax;i++){const Xx=x0+i/180*(x1-x0),Yy=y1-this.vc[i]/vm*(y1-y0-10);i?ctx.lineTo(Xx,Yy):ctx.moveTo(Xx,Yy)}ctx.strokeStyle=C.yel;ctx.lineWidth=2.5;ctx.stroke();
+    if(this.ang!==null&&this.rot===0){const deg=this.ang*180/Math.PI,v=this.varAt(this.ang);circ(x0+deg/180*(x1-x0),y1-v/vm*(y1-y0-10),6,C.org,'#fff',2);tx(`spread = ${v.toFixed(2)}`,x1,y0+8,{a:'right',s:13,w:700,c:C.org})}
+    if(this.ph>=3){const deg=this.th*180/Math.PI;ln(x0+deg/180*(x1-x0),y0,x0+deg/180*(x1-x0),y1,C.pink,1.5,[5,4]);tx('most spread → PC1',x0+deg/180*(x1-x0),y1+30,{s:12,w:700,c:C.pink})}}
+  panel(630,324,450,224,'Information kept by each direction');
+  if(this.ph>=3){const tot=this.l1+this.l2;[[this.l1,'PC1',C.pink],[this.l2,'PC2',C.grn]].forEach(([l,n,col],i)=>{const y=380+i*60,w=330*l/tot*this.pc2;tx(n,655,y,{a:'left',s:15,w:700,c:col});rr(705,y-14,330,28,6,'#1e293b');rr(705,y-14,Math.max(1,w),28,6,col);tx((100*l/tot).toFixed(1)+'%',712+Math.max(w,0),y,{a:'left',s:13,w:700,c:'#fff'})});
+    tx('(PC1 + PC2 = 100% of the information)',855,505,{s:13,c:C.mut})}
+  else tx('Revealed after the search (Step 3)',855,430,{s:13,c:C.mut});
+}});
+
+/* ---------- 8. Neural network ---------- */
+scene({id:'nn',group:'Deep Learning',icon:'🧠',short:'Neural Network',
+title:'Neural Network — forward pass & backpropagation',
+sub:'Clues flow forward to make a guess. If the guess is wrong, the blame flows backward so every connection can improve a little.',gap:500,
+story:'A team of friends must decide <b>Cat or Dog</b>. Each friend looks at the clues, forms an opinion and passes it on. If the final answer is wrong, the <b>blame is passed back</b> — friends who caused the mistake change their opinion the most. Repeat many times → the team gets smart.',
+keys:['Each circle = a <b>neuron</b>: it multiplies its inputs by <b>weights</b>, adds them up and passes the result on.','Lines = weights. Blue = positive, orange = negative, thicker = stronger.','<b>Forward pass</b> (yellow dots) = make a guess.','<b>Loss</b> = how wrong the guess was (0 = perfect).','<b>Backpropagation</b> (red) = send the blame backward, then nudge every weight. Repeat!'],
+L:[3,4,4,2],LX:[130,330,530,730],IN:['x₁ ear shape','x₂ barking','x₃ size'],OUT:['🐱 Cat','🐶 Dog'],
+ui(){uiBtn('⚡ Learn 25 rounds instantly',()=>{tweens=[];const l0=this.loss;for(let i=0;i<25;i++)this.train();this.ph=1;this.la=[1,1,1,1];this.grad=null;this.pulse=null;this.showLoss=1;
+  say(`Learned 25 more rounds in a flash: the mistake (loss) fell from ${l0.toFixed(2)} → <b>${this.loss.toFixed(2)}</b> and the network is now <b>${(this.p[0]*100).toFixed(0)}%</b> sure it is a Cat. 🎉 See the falling curve on the right.`)})},
+init(){seed=7;const mk=(r,c)=>[...Array(r)].map(()=>[...Array(c)].map(()=>randn()*.7));this.W=[mk(4,3),mk(4,4),mk(2,4)];this.B=[[.1,.1,.1,.1],[.1,.1,.1,.1],[0,0]];
+  this.x=[.9,.2,.3];this.y=0;this.lr=.03;this.ep=0;this.fw();this.lh=[this.loss];
+  this.ph=0;this.la=[0,0,0,0];this.pulse=null;this.grad=null;this.gl=3;this.showLoss=0;this.upd=0;this.calc='';
+  say('A tiny network must decide: <b>Cat or Dog?</b> It gets 3 clues: ear shape, barking, size. Its weights start <b>random</b>, so its first guess is poor. The correct answer is <b>🐱 Cat</b>. Press <b>▶ Play</b>.')},
+fw(){const A=[this.x],Z=[null];let a=this.x;this.W.forEach((Wl,l)=>{const z=Wl.map((r,j)=>r.reduce((s,w,i)=>s+w*a[i],0)+this.B[l][j]);Z.push(z);a=l<2?z.map(v=>Math.max(0,v)):softmax(z);A.push(a)});
+  this.A=A;this.Z=Z;this.p=A[3];this.loss=-Math.log(Math.max(1e-12,this.p[this.y]))},
+bw(){const G=[];let dz=this.p.map((v,j)=>v-(j===this.y?1:0));
+  for(let l=2;l>=0;l--){const a=this.A[l];G[l]=dz.map(d=>a.map(ai=>d*ai));G[l].db=dz.slice();
+    if(l>0){const da=a.map((_,i)=>this.W[l].reduce((s,r,j)=>s+r[i]*dz[j],0));dz=da.map((v,i)=>this.Z[l][i]>0?v:0)}}return G},
+train(){this.fw();const G=this.bw();for(let l=0;l<3;l++){this.W[l].forEach((r,j)=>r.forEach((_,i)=>r[i]-=this.lr*G[l][j][i]));this.B[l].forEach((_,j)=>this.B[l][j]-=this.lr*G[l].db[j])}
+  this.ep++;this.fw();this.lh.push(this.loss)},
+pos(l,i){return[this.LX[l],280+(i-(this.L[l]-1)/2)*100]},
+step(){const ph=this.ph,f=v=>v.toFixed(2);
+  if(ph===0){this.fw();this.la=[0,0,0,0];tween(500,p=>this.la[0]=p);this.ph=1;say('① The 3 clues (numbers) enter the network on the left.');return}
+  if(ph>=1&&ph<=3){const l=ph-1;if(l===0){this.la=[1,0,0,0];this.grad=null;this.gl=3;this.showLoss=0;this.fw()}
+    this.pulse={l,dir:1,p:0};tween(900,p=>this.pulse.p=p,()=>{this.pulse=null;tween(350,p=>this.la[l+1]=p)});
+    const a=this.A[l],r=this.W[l][0],z=this.Z[l+1][0],act=l<2?'ReLU':'score';
+    this.calc=`Example (${l<2?'top neuron':'Cat score'}): ${r.map((w,i)=>`${f(w)}×${f(a[i])}`).join(' + ')} + ${f(this.B[l][0])} = ${f(z)}${l<2?(z<0?' → negative, so ReLU gives 0':' → passed on'):''}`;
+    if(l===0)say('② <b>Hidden layer 1</b>: each neuron multiplies every clue by its weight and adds them up. If the total is negative it outputs 0 (this rule is called <b>ReLU</b>), otherwise it passes the number on.');
+    else if(l===1)say('③ <b>Hidden layer 2</b>: the same thing again, using layer 1’s answers as its clues. More layers = can learn more complex patterns.');
+    else say(`④ <b>Output</b>: the network says Cat <b>${(this.p[0]*100).toFixed(0)}%</b>, Dog <b>${(this.p[1]*100).toFixed(0)}%</b>. (A function called <b>softmax</b> turns the scores into percentages that add up to 100%.)`);
+    this.ph++;return}
+  if(ph===4){tween(600,p=>this.showLoss=p);this.ph=5;say(`⑤ <b>How wrong was it?</b> The answer is Cat, but the network was only ${(this.p[0]*100).toFixed(0)}% sure. Its mistake score (<b>loss</b>) = <b>${this.loss.toFixed(2)}</b>. 0 would be perfect.`);return}
+  if(ph===5){this.grad=this.bw();this.gl=3;const go=l=>{if(l<0){this.pulse=null;return}this.pulse={l,dir:-1,p:0};tween(700,p=>this.pulse.p=p,()=>{this.gl=l;go(l-1)})};go(2);this.ph=6;
+    say('⑥ <b>Backpropagation</b>: the mistake is sent backward (red). Thicker, brighter red lines = weights that were <b>more to blame</b> for the mistake.');return}
+  if(ph===6){const l0=this.loss;this.train();this.upd=1;tween(900,p=>this.upd=1-p);this.ph=1;this.la=[1,0,0,0];
+    say(`⑦ <b>Learn</b>: every weight is nudged a little in the direction that reduces the mistake. Round ${this.ep}: loss ${l0.toFixed(2)} → <b>${this.loss.toFixed(2)}</b>. Keep pressing Play — the Cat % keeps going up!`)}},
+draw(){const L=this.L;panel(15,12,815,536);
+  ['Clues (input)','Hidden layer 1','Hidden layer 2','Answer (output)'].forEach((t,l)=>tx(t,this.LX[l],42,{s:13,w:700,c:C.mut}));
+  const mw=Math.max(...this.W.flat(2).map(Math.abs)),gm=this.grad?Math.max(1e-9,...this.grad.flat(2).map(Math.abs)):1;
+  for(let l=0;l<3;l++)for(let j=0;j<L[l+1];j++)for(let i=0;i<L[l];i++){const[x1,y1]=this.pos(l,i),[x2,y2]=this.pos(l+1,j),w=this.W[l][j][i];
+    ln(x1,y1,x2,y2,rgba(w>=0?C.sky:C.org,.5),.6+3.2*Math.abs(w)/mw);
+    if(this.upd>0)ln(x1,y1,x2,y2,rgba('#ffffff',.5*this.upd),1.5);
+    if(this.grad&&l>=this.gl){const g=Math.abs(this.grad[l][j][i])/gm;ln(x1,y1,x2,y2,rgba(C.red,.15+.85*g),1+4*g)}}
+  const pu=this.pulse;if(pu){const l=pu.l;for(let j=0;j<L[l+1];j++)for(let i=0;i<L[l];i++){const[x1,y1]=this.pos(l,i),[x2,y2]=this.pos(l+1,j),p=pu.dir>0?pu.p:1-pu.p;
+    const m=pu.dir>0?Math.abs(this.W[l][j][i]*this.A[l][i]):Math.abs(this.grad[l][j][i])/gm;circ(lerp(x1,x2,p),lerp(y1,y2,p),2.5+Math.min(4,m*4),pu.dir>0?C.yel:C.red)}}
+  for(let l=0;l<4;l++){const mx=l===3?1:Math.max(1e-6,...this.A[l]);for(let i=0;i<L[l];i++){const[x,y]=this.pos(l,i),v=this.A[l][i],a=this.la[l];
+    circ(x,y,25,'#0b1222',C.line,2);if(a>0)ga(a,()=>{circ(x,y,25,rgba(l===3?C.grn:C.sky,.15+.7*v/mx));tx(v.toFixed(2),x,y,{s:12,w:700})});
+    if(l===0)tx(this.IN[i],x-34,y,{a:'right',s:13,c:C.mut});if(l===3)tx(this.OUT[i],x+34,y,{a:'left',s:14,w:700})}}
+  if(this.calc&&this.ph>=2&&this.ph<=4)tx(this.calc,420,522,{s:13,c:C.yel});
+  panel(845,12,240,536,'Network’s guess');
+  const sh=this.la[3];[0,1].forEach(k=>{const y=62+k*50;tx(this.OUT[k],860,y,{a:'left',s:14,w:700});rr(940,y-11,120,22,6,'#1e293b');
+    if(sh>0){rr(940,y-11,Math.max(1,120*this.p[k]*sh),22,6,k===this.y?C.grn:C.org);tx((this.p[k]*100).toFixed(0)+'%',1000,y,{s:12,w:700,c:'#fff'})}});
+  tx('correct answer: 🐱 Cat',965,160,{s:12,c:C.grn});
+  if(this.showLoss>0)ga(this.showLoss,()=>{rr(858,180,214,64,10,'rgba(248,113,113,.12)',C.red,1.5);tx('Mistake (loss)',965,200,{s:13,c:C.mut});tx(this.loss.toFixed(2),965,225,{s:20,w:800,c:C.red})});
+  tx(`learning round ${this.ep}`,965,268,{s:13,c:C.mut});
+  const x0=870,x1=1065,y0=310,y1=510,lm=Math.max(...this.lh),n=Math.max(10,this.lh.length);axes(x0,y0,x1,y1,'learning round');tx('Mistake over time ↓',x0,y0-14,{a:'left',s:12,w:700,c:C.mut});
+  ctx.beginPath();this.lh.forEach((v,i)=>{const X=x0+i/(n-1)*(x1-x0),Y=y1-v/lm*(y1-y0);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.strokeStyle=C.red;ctx.lineWidth=2.5;ctx.stroke();
+}});
+
+/* ---------- 9. RNN ---------- */
+scene({id:'rnn',group:'Deep Learning',icon:'🔁',short:'RNN',
+title:'Recurrent Neural Network — memory through time',
+sub:'An RNN reads a sentence one word at a time and carries a small memory from each word to the next.',gap:600,
+story:'Like reading a story <b>one word at a time</b> while keeping a short summary in your head. After each word you update the summary. But by the end of a long story, you have mostly <b>forgotten the beginning</b>.',
+keys:['RNN reads words <b>one by one, in order</b> — order matters!','After each word it updates its <b>memory</b> (called the hidden state, h) and passes it on.','The <b>same cell</b> is reused for every word.','Problem: memory of early words <b>fades</b> (purple bars) → RNNs have <b>short-term memory</b>.','✍️ Type your own sentence in the box below and press Enter.'],
+ui(){uiText('Sentence',this.sent,v=>{this.sent=v;this.init()})},
+init(){this.sent=this.sent??'I love deep learning';const w=this.sent.trim().split(/\s+/).filter(Boolean).slice(0,7);this.w=w.length?w:['hello'];
+  seed=42;this.Wx=[...Array(4)].map(()=>[...Array(3)].map(()=>randn()*.9));this.Wh=[...Array(4)].map(()=>[...Array(4)].map(()=>randn()*.35));
+  this.X=this.w.map(t=>{seed=hashStr(t.toLowerCase());return[...Array(3)].map(()=>clamp(randn(),-1.5,1.5))});this.H=this.run(this.X);
+  const T=this.w.length;this.inf=[];for(let t=1;t<=T;t++)this.inf.push(this.infX(t));const i0=this.inf[0];this.inf=this.inf.map(v=>v/i0);
+  this.g=[];const gT=this.gradH(T,T);for(let k=1;k<=T;k++)this.g.push(this.gradH(k,T)/gT);
+  this.ph=0;this.t=0;this.un=0;this.pp=0;this.bp=0;
+  say(`We will feed the sentence “<b>${this.w.join(' ')}</b>” to an RNN, <b>one word at a time</b>. On the left is the RNN cell — the curved arrow (loop) is its <b>memory</b> going round. Press <b>Step</b>.`)},
+cell(x,h){return this.Wx.map((r,i)=>Math.tanh(r[0]*x[0]+r[1]*x[1]+r[2]*x[2]+this.Wh[i].reduce((s,w,j)=>s+w*h[j],0)))},
+run(X){const H=[[0,0,0,0]];for(const x of X)H.push(this.cell(x,H[H.length-1]));return H},
+infX(t){const e=1e-4;let s=0;for(let d=0;d<3;d++){const X2=this.X.map(v=>v.slice());X2[0][d]+=e;const H2=this.run(X2);for(let i=0;i<4;i++)s+=((H2[t][i]-this.H[t][i])/e)**2}return Math.sqrt(s)},
+gradH(k,T){const e=1e-4;let s=0;for(let d=0;d<4;d++){let h=this.H[k].slice();h[d]+=e;for(let t=k+1;t<=T;t++)h=this.cell(this.X[t-1],h);for(let i=0;i<4;i++)s+=((h[i]-this.H[T][i])/e)**2}return Math.sqrt(s)},
+cx(i){const T=this.w.length,span=Math.min(140*(T-1),880);const x=T>1?550-span/2+i*span/(T-1):550;return lerp(150,x,this.un)},
+step(){const T=this.w.length;
+  if(this.ph===0){this.ph=1;tween(1400,p=>this.un=p);say('<b>Unrolling</b>: we draw one copy of the cell for each word so we can see time from left to right. It is still the <b>same cell</b> (same weights) used again and again.');return}
+  if(this.ph===1&&this.t<T){this.t++;this.pp=0;tween(1100,p=>this.pp=p);const t=this.t;
+    say(`Word ${t}: “<b>${this.w[t-1]}</b>”. The cell mixes this word with its memory of the earlier words and makes a <b>new memory h${t}</b> (the small bars). `+(t>1?`🟣 Purple bars on top: how much of “${this.w[0]}” is still remembered.`:'')+(t===T?' The last memory is a summary of the whole sentence — it can be used to decide e.g. “positive or negative review?”.':''));return}
+  if(this.ph===1){this.ph=2;tween(2400,p=>this.bp=p);
+    say(`<b>Learning backwards</b>: to learn, a correction signal travels back from the last word (red). It gets <b>weaker at every step</b> — at the first word only <b>${(this.g[0]*100).toFixed(0)}%</b> is left. So the RNN hardly learns from early words. This is the <b>vanishing gradient</b> problem → fixed by <b>LSTM</b> (next animation).`);return}
+  return'end'},
+draw(){const T=this.w.length,cy=290,bw=96,bh=84;panel(15,12,1070,536);
+  // influence chart
+  tx(`🟣 How much of “${this.w[0]}” is still remembered`,30,38,{a:'left',s:13,w:700,c:C.mut});
+  for(let i=0;i<T;i++){const done=this.ph>=1&&(i<this.t-1||(i===this.t-1&&this.pp>.5));if(!done||this.un<1)continue;const x=this.cx(i),h=70*this.inf[i];rr(x-18,140-h,36,h,4,C.vio);tx((this.inf[i]*100).toFixed(0)+'%',x,140-h-10,{s:11,c:C.vio})}
+  ln(40,141,1060,141,C.dim,1);
+  // h arrows between cells
+  for(let i=0;i<T-1;i++){if(this.un<.99)break;const x1=this.cx(i)+bw/2,x2=this.cx(i+1)-bw/2,act=i<this.t-1;arrow(x1,cy-12,x2-2,cy-12,act?C.sky:C.dim,2.5);
+    if(act)tx(`h${i+1}`,(x1+x2)/2,cy-26,{s:12,c:C.sky});
+    if(i===this.t-2&&this.pp<.5)circ(lerp(x1,x2,this.pp*2),cy-12,6,C.yel)}
+  // BPTT arrows
+  if(this.ph===2)for(let k=T-1;k>=0;k--){const a=clamp(this.bp*T-(T-1-k),0,1);if(a<=0)continue;const g=this.g[k],x=this.cx(k);
+    ga(a,()=>{if(k<T-1){const x1=this.cx(k+1)-bw/2,x2=x+bw/2;arrow(x1,cy+22,x2+2,cy+22,rgba(C.red,.15+.85*g),1+6*g,10)}
+      rr(x-36,cy+bh/2+8,72,22,6,'rgba(2,6,23,.9)',rgba(C.red,.3+.7*g));tx((g*100).toFixed(0)+'%',x,cy+bh/2+19,{s:12,w:700,c:C.red})})}
+  // cells, tokens
+  for(let i=T-1;i>=0;i--){const x=this.cx(i),a=i===0?1:this.un,cur=this.ph===1&&i===this.t-1&&this.pp<1,done=i<this.t-1||(i===this.t-1&&this.pp>=.5);
+    ga(a,()=>{rr(x-bw/2,cy-bh/2,bw,bh,12,cur?'rgba(56,189,248,.18)':'#1b2748',cur?C.yel:C.sky,cur?3:1.8);tx('RNN',x,cy-bh/2+13,{s:11,w:700,c:C.mut});
+      if(done){const h=this.H[i+1],k=i===this.t-1?clamp((this.pp-.5)*2,0,1):1;h.forEach((v,j)=>{const bx=x-30+j*16,hh=v*24*k;ctx.fillStyle=v>=0?C.sky:C.pink;ctx.fillRect(bx,cy+8-Math.max(hh,0),11,Math.abs(hh))});ln(x-34,cy+8,x+34,cy+8,C.dim,1)}
+      const ty=448;rr(x-46,ty-17,92,34,8,'#0b1222',C.org,1.5);tx(this.w[i],x,ty,{s:14,w:700,c:C.org});
+      const fed=i<this.t-1||(i===this.t-1);arrow(x,ty-19,x,cy+bh/2+2,fed?C.org:C.dim,2);
+      if(cur&&this.pp<.5)circ(x,lerp(ty-19,cy+bh/2,this.pp*2),6,C.yel);
+      tx(`x${i+1}`,x+12,ty-40,{a:'left',s:11,c:C.mut});
+      if(done){arrow(x,cy-bh/2,x,cy-bh/2-34,C.grn,2);tx(`y${i+1}`,x,cy-bh/2-44,{s:12,c:C.grn})}})}
+  if(this.un<1)ga(1-this.un,()=>{const x=this.cx(0);ctx.beginPath();ctx.arc(x+bw/2+10,cy-6,26,-Math.PI*.8,Math.PI*.8);ctx.strokeStyle=C.sky;ctx.lineWidth=2.5;ctx.stroke();tx('loop = memory passed to the next word',x+bw/2+44,cy-40,{a:'left',s:12,c:C.sky})});
+  tx('Small bars inside each cell = the memory (hidden state h) after reading that word',550,530,{s:12,c:C.mut});
+}});
+
+/* ---------- 10. LSTM ---------- */
+scene({id:'lstm',group:'Deep Learning',icon:'🧮',short:'LSTM',
+title:'LSTM — an RNN with a smart memory',
+sub:'An LSTM keeps important facts on a “memory belt” and uses 3 gates to decide what to forget, what to write and what to use.',gap:900,
+story:'A student reads a story with a <b>notebook</b>: an <b>eraser</b> 🗑️ removes old facts (forget gate), a <b>pen</b> ✍️ writes new important facts (input gate), and they <b>read out</b> 📤 only what is needed right now (output gate).',
+keys:['<b>Memory belt</b> (called the <i>cell state</i>) = long-term memory that runs through every step.','🗑️ <b>Forget gate</b>: which old facts should I erase?','✍️ <b>Input gate</b>: which new facts should I write?','📤 <b>Output gate</b>: which part of memory should I use right now?','Gates work like taps: 0% = closed, 100% = fully open (values here are illustrative).','Facts stay safely on the belt, so an LSTM remembers <b>much longer</b> than a simple RNN.'],
+SEQ:[
+ {w:'Ravi',f:1,i:.95,o:.2,wr:{s:'Ravi (he)'},n:'A person’s name! ✍️ The <b>input gate opens</b> and writes <b>“Ravi (he)”</b> into memory.'},
+ {w:'plays',f:1,i:.1,o:.3,n:'Nothing important to save. 🗑️ The forget gate <b>keeps everything</b> and ✍️ the input gate stays almost closed.'},
+ {w:'cricket',f:1,i:.9,o:.3,wr:{a:'cricket'},n:'A useful fact → ✍️ write <b>“cricket”</b> as the activity.'},
+ {w:'.',f:1,i:.05,o:.1,n:'End of the sentence. Keep the memory as it is.'},
+ {w:'Priya',f:.05,i:.95,o:.2,er:['s'],wr:{s:'Priya (she)'},n:'A <b>new person</b>! 🗑️ The forget gate <b>erases “Ravi (he)”</b> and ✍️ the input gate writes <b>“Priya (she)”</b>.'},
+ {w:'loves',f:1,i:.1,o:.3,n:'Nothing new to save. Keep the memory.'},
+ {w:'music',f:.1,i:.9,o:.3,er:['a'],wr:{a:'music'},n:'A new activity → 🗑️ erase <b>“cricket”</b>, ✍️ write <b>“music”</b>.'},
+ {w:'.',f:1,i:.05,o:.1,n:'End of the sentence. Keep everything.'},
+ {w:'Then',f:1,i:.1,o:.95,out:'s',pred:'she',n:'Now the model must <b>guess the next word</b>. 📤 The output gate <b>opens</b> and reads the memory: the person is <b>Priya (she)</b> → next word = <b>“she”</b> ✅'}],
+init(){this.t=-1;this.mem={s:null,a:null};this.prev={s:null,a:null};this.er=[];this.wr={};this.p=1;this.g={f:1,i:0,o:0};this.pred=null;this.fin=0;this.fa=0;
+  say('We will read: “<b>Ravi plays cricket. Priya loves music. Then ___</b>” and the LSTM must <b>guess the missing word</b>. Watch the <b>memory belt</b> (top) and the <b>3 gates</b> (middle). Press <b>Step</b>.')},
+step(){const N=this.SEQ.length;
+  if(this.t>=N-1){if(this.fin)return'end';this.fin=1;tween(800,p=>this.fa=p);
+    say('🎉 <b>That is an LSTM!</b> A <b>memory belt</b> plus 3 gates: 🗑️ forget, ✍️ write, 📤 use. A simple RNN would have mostly forgotten the start of the story; the LSTM keeps important facts safely on the belt until a gate decides to change them. (<b>GRU</b> is a lighter version with only 2 gates.)');return}
+  this.t++;const e=this.SEQ[this.t],g0={...this.g};this.prev={...this.mem};this.er=e.er||[];this.wr=e.wr||{};
+  for(const k of this.er)this.mem[k]=null;Object.assign(this.mem,this.wr);
+  this.p=0;tween(2400,(_,p)=>{this.p=p;const q=clamp((p-.12)/.25,0,1);for(const k of['f','i','o'])this.g[k]=lerp(g0[k],e[k],q)},()=>{if(e.pred)this.pred=e.pred});
+  say(`Word ${this.t+1} — “<b>${e.w}</b>”: ${e.n}`)},
+draw(){const N=this.SEQ.length,e=this.t>=0?this.SEQ[this.t]:null,p=this.p,SL={s:365,a:635},BY=165;
+  panel(15,12,1070,536);
+  for(let i=0;i<=N;i++){const x=90+i*100,cur=i===this.t,past=i<this.t,gs=i===N&&this.pred,w=i<N?this.SEQ[i].w:(gs?this.pred:'___');
+    ga(cur||gs?1:past?.65:.3,()=>{rr(x-42,30,84,30,8,cur?'rgba(250,204,21,.15)':(gs?'rgba(74,222,128,.18)':'#0b1222'),cur?C.yel:(gs?C.grn:C.line),cur?2.5:1.2);tx(w,x,45,{s:14,w:700,c:cur?C.yel:(gs?C.grn:C.ink)})})}
+  rr(55,76,1010,400,16,'rgba(251,146,60,.04)',C.org,1.5);tx('LSTM cell',72,92,{a:'left',s:13,w:700,c:C.org});
+  tx('🧠 Memory belt (cell state) = long-term memory',550,122,{s:14,w:700,c:C.sky});
+  rr(30,BY-22,1040,44,22,'#16213f',C.sky,1.5);
+  ctx.save();ctx.setLineDash([10,16]);ctx.lineDashOffset=-T*30;ctx.beginPath();ctx.moveTo(44,BY);ctx.lineTo(1056,BY);ctx.strokeStyle='rgba(56,189,248,.35)';ctx.lineWidth=3;ctx.stroke();ctx.restore();
+  const G=[{x:230,t:'🗑️ Forget gate',q:'Which old facts to erase?',k:'f',c:C.red,s:'×',lab:v=>v<.5?`keep ${Math.round(v*100)}% → ERASE`:`keep ${Math.round(v*100)}%`},
+           {x:500,t:'✍️ Input gate',q:'Which new facts to write?',k:'i',c:C.grn,s:'+',lab:v=>`write ${Math.round(v*100)}%`},
+           {x:770,t:'📤 Output gate',q:'What to use right now?',k:'o',c:C.vio,s:'↓',lab:v=>`use ${Math.round(v*100)}%`}];
+  for(const g of G){ln(g.x,BY+14,g.x,262,g.c,2);circ(g.x,BY,14,'#0f172a',g.c,2);tx(g.s,g.x,BY+1,{s:16,w:800,c:g.c})}
+  for(const g of G){const v=this.g[g.k],act=e&&p>.12&&(g.k==='f'?v<.5:v>.5);
+    rr(g.x-110,262,220,84,10,act?rgba(g.c,.2):'#1b2748',g.c,act?3:1.5);tx(g.t,g.x,279,{s:14,w:700,c:g.c});tx(g.q,g.x,297,{s:12,c:C.mut});
+    rr(g.x-90,307,180,14,7,'#0b1222');if(v>.005)rr(g.x-90,307,180*v,14,7,g.c);tx(g.lab(v),g.x,333,{s:12,w:700})}
+  ln(230,346,230,385,C.org,2);ln(770,346,770,385,C.org,2);ln(230,385,770,385,C.org,2);ln(500,346,500,412,C.org,2);
+  rr(390,412,220,40,10,'#0b1222',C.org,2);tx(e?`📥 Current word: ${e.w}`:'📥 Current word: —',500,432,{s:15,w:700,c:C.org});
+  if(e&&p<.15){const q=p/.15;for(const g of G)circ(lerp(500,g.x,q),lerp(412,346,q),6,C.yel)}
+  arrow(880,304,912,304,C.vio,2);rr(915,268,138,72,10,'#0b1222',C.vio,2);tx('💬 Next-word guess',984,286,{s:12,c:C.mut});tx(this.pred?this.pred+' ✅':'…',984,314,{s:20,w:800,c:this.pred?C.grn:C.mut});
+  const card=(k,val,x,y,a,sc)=>ga(a,()=>{const w=200*sc,h=34*sc;rr(x-w/2,y-h/2,w,h,9,k==='s'?'#3b1d4a':'#123329',k==='s'?C.pink:C.grn,2);tx((k==='s'?'👤 Who: ':'🎯 Activity: ')+val,x,y+1,{s:Math.max(9,14*sc),w:700})});
+  for(const k of['s','a']){const x=SL[k],er=this.er.includes(k),wr=k in this.wr;
+    ctx.save();ctx.setLineDash([5,5]);rr(x-100,BY-17,200,34,9,null,'#475569',1.2);ctx.restore();tx(k==='s'?'👤 Who: —':'🎯 Activity: —',x,BY+1,{s:13,c:'#64748b'});
+    if(er&&this.prev[k]){const q=clamp((p-.4)/.25,0,1);if(q<1)card(k,this.prev[k],lerp(x,230,q),lerp(BY,262,q),1-q,1-.5*q)}
+    else if(!wr&&this.mem[k])card(k,this.mem[k],x,BY,1,1);
+    if(wr){const q=clamp((p-.65)/.25,0,1);if(q>0)card(k,this.wr[k],lerp(500,x,q),lerp(262,BY,q),q,.5+.5*q)}
+    if(e&&e.out===k&&p>.7)rr(x-104,BY-21,208,42,11,null,C.yel,3)}
+  if(e&&e.out&&p>.7&&p<1){const q=clamp((p-.7)/.25,0,1);circ(lerp(SL[e.out],984,q),lerp(BY,304,q),8,C.yel)}
+  tx('Gates work like taps: 0% = closed, 100% = fully open  (values are illustrative)',550,490,{s:12,c:C.mut});
+  if(this.fa>0)ga(this.fa,()=>{rr(150,500,800,42,12,'rgba(2,6,23,.95)',C.yel,2);tx('LSTM = memory belt + 3 gates:   🗑️ forget  ·  ✍️ write  ·  📤 use',550,521,{s:16,w:700,c:C.yel})});
+}});
+
+/* ---------- 11. Self-attention ---------- */
+scene({id:'attention',group:'Transformers',icon:'🔦',short:'Self-Attention',
+title:'Self-Attention — how a word figures out its meaning',
+sub:'Every word looks at all the other words in the sentence and decides which ones matter most to it.',gap:1500,
+story:'Like a <b>YouTube search</b>: you type a search (the <b>Query</b>), YouTube compares it with every video’s title and tags (the <b>Keys</b>), and you watch the best-matching videos (their <b>Values</b>). Each word “searches” the sentence for the words that matter to it.',
+keys:['<b>Attention</b> = each word decides how much to “look at” every other word.','<b>Query</b> = a word’s question. <b>Key</b> = what each word offers. <b>Value</b> = the information it passes on.','Match scores → <b>softmax</b> → percentages that add up to 100%.','The word’s new meaning = a mix of the other words, in those percentages.','👆 <b>Click any word</b> to see what it looks at. (Weights are hand-picked to show the idea.)'],
+KEYW:{The:'pointer',animal:'living thing',"didn't":'not',cross:'action',the:'pointer',street:'place',because:'reason',it:'pronoun',was:'past',too:'amount',tired:'feeling',wide:'size'},
+LINKS:{tired:{The:{animal:2},animal:{tired:1.6,cross:1.2},"didn't":{cross:2,animal:.8},cross:{street:1.8,animal:1.5,"didn't":1.2},the:{street:2},street:{cross:1.6,the:1},because:{tired:1.2,"didn't":1},it:{animal:3,tired:1.6,street:1},was:{it:1.4,tired:1.3},too:{tired:2.2},tired:{animal:2.4,it:1.8,too:1.2,was:.8}},
+  wide:{The:{animal:2},animal:{cross:1.2},"didn't":{cross:2,animal:.8},cross:{street:1.8,animal:1.5,"didn't":1.2},the:{street:2},street:{cross:1.6,wide:1.4,the:1},because:{wide:1.2,"didn't":1},it:{street:3,wide:1.6,animal:1},was:{it:1.4,wide:1.3},too:{wide:2.2},wide:{street:2.4,it:1.8,too:1.2,was:.8}}},
+words(){return['The','animal',"didn't",'cross','the','street','because','it','was','too',this.end]},
+X(i){return 80+i*94},
+att(qi){const W=this.words(),L=this.LINKS[this.end][W[qi]]||{};const sc=W.map((w,j)=>(j===qi?1:Math.abs(j-qi)===1?.6:.2)+(L[w]||0));return{sc,p:softmax(sc)}},
+topOf(qi){const W=this.words(),p=this.att(qi).p;return p.map((v,j)=>[v,W[j],j]).filter(x=>x[2]!==qi).sort((a,b)=>b[0]-a[0])},
+ui(){uiBtn('🔁 Switch “tired” ↔ “wide”',()=>this.toggle())},
+init(){this.end='tired';this.qi=7;const a=this.att(7);this.sc=a.sc;this.p=a.p;this.ph=0;this.a1=this.a2=this.a3=this.a4=this.a5=0;
+  say('Read: “The animal didn’t cross the street because <b>it</b> was too tired.” Does <b>“it”</b> mean the animal or the street? You know instantly — the animal! Let’s see how a Transformer works this out. Press <b>Step</b>.')},
+setQ(qi,ms=800){this.qi=qi;const a=this.att(qi),s0=this.sc.slice(),p0=this.p.slice();tween(ms,e=>{this.sc=s0.map((v,j)=>lerp(v,a.sc[j],e));this.p=p0.map((v,j)=>lerp(v,a.p[j],e))})},
+showAll(){tweens=[];this.a1=this.a2=this.a3=this.a4=this.a5=1;this.ph=7},
+toggle(){this.showAll();this.end=this.end==='tired'?'wide':'tired';this.setQ(this.qi);const W=this.words(),t=this.topOf(this.qi);
+  say(`The last word is now “<b>${this.end}</b>”. “${W[this.qi]}” now pays most attention to “<b>${t[0][1]}</b>” (${Math.round(t[0][0]*100)}%). Change one word → the attention changes. That is <b>context</b>!`)},
+click(x,y){if(y<225||y>280)return;const W=this.words(),P=v=>Math.round(v*100)+'%';for(let i=0;i<W.length;i++)if(Math.abs(x-this.X(i))<45){this.showAll();this.setQ(i);const t=this.topOf(i);
+  say(`“<b>${W[i]}</b>” pays most attention to “<b>${t[0][1]}</b>” (${P(t[0][0])}) and “<b>${t[1][1]}</b>” (${P(t[1][0])}). Click another word, or switch tired ↔ wide.`);return}},
+step(){const P=v=>Math.round(v*100)+'%';
+  switch(this.ph){
+  case 0:this.ph=1;tween(700,p=>this.a1=p);say('① Every word asks a question — its <b>Query</b>. The word “it” asks: <i>“Who or what am I talking about?”</i>');break;
+  case 1:this.ph=2;tween(900,p=>this.a2=p);say('② Every word also shows a label — its <b>Key</b> 🔑 — describing what it offers. “animal” says <i>“I’m a living thing”</i>, “street” says <i>“I’m a place”</i>, “tired” says <i>“I’m a feeling”</i>.');break;
+  case 2:this.ph=3;tween(1000,p=>this.a3=p);say('③ Compare the question with every label → a <b>match score</b> (the bars). Better match = taller bar. (In maths: the dot product <b>Query · Key</b>.)');break;
+  case 3:{this.ph=4;tween(1000,p=>this.a4=p);const t=this.topOf(7);say(`④ <b>Softmax</b> turns the scores into percentages that add up to 100%. “it” pays <b>${P(t[0][0])}</b> of its attention to “<b>${t[0][1]}</b>” (the thickest yellow arc).`);break}
+  case 4:{this.ph=5;tween(1000,p=>this.a5=p);const t=this.topOf(7);say(`⑤ Every word passes on its information (its <b>Value</b>) in those amounts. New meaning of “it” ≈ ${P(t[0][0])} ${t[0][1]} + ${P(t[1][0])} ${t[1][1]} + … → the model now understands <b>it = the animal</b>. 🎯`);break}
+  case 5:{this.ph=6;this.end='wide';this.setQ(7,1200);const t=this.topOf(7);say(`⑥ Now change ONE word: “…because it was too <b>wide</b>”. The attention jumps to “<b>${t[0][1]}</b>” (${P(t[0][0])})! Animals aren’t wide — streets are. A word’s meaning depends on its <b>context</b>.`);break}
+  case 6:this.ph=7;say('⑦ 👆 <b>Click any word</b> to see what it pays attention to. In a Transformer <b>every word does this at the same time</b> — that is <b>self-attention</b>. Real models run many of these side by side (<b>multi-head attention</b>), each spotting different relationships.');break;
+  default:return'end'}},
+draw(){const W=this.words(),n=W.length,qi=this.qi,P=this.p,mp=Math.max(...P.filter((_,j)=>j!==qi)),WY=252;panel(15,12,1070,536);
+  if(this.a1>0)ga(this.a1,()=>{rr(200,24,700,44,22,'rgba(250,204,21,.12)',C.yel,1.5);tx(`🔦 Query from “${W[qi]}”:  `+(qi===7?'Who or what am I talking about?':'Which words help me understand myself?'),550,46,{s:15,w:700,c:C.yel})});
+  else tx('Which word does “it” refer to — the animal or the street?',550,46,{s:16,w:700,c:C.mut});
+  if(this.a4>0)for(let j=0;j<n;j++){if(j===qi)continue;const x1=this.X(qi),x2=this.X(j),d=Math.abs(x2-x1),w=P[j];
+    ctx.beginPath();ctx.moveTo(x1,WY-19);ctx.quadraticCurveTo((x1+x2)/2,WY-50-d*.25,x2,WY-19);ctx.strokeStyle=rgba(C.yel,(.12+.88*w/mp)*this.a4);ctx.lineWidth=1+16*w*this.a4;ctx.stroke()}
+  W.forEach((w,j)=>{const x=this.X(j),q=j===qi&&this.a1>0,h=j===qi?0:this.a4*P[j]/mp;
+    rr(x-44,WY-17,88,34,8,q?'rgba(250,204,21,.28)':(h>0?rgba(C.yel,.06+.3*h):'#0b1222'),q?C.yel:(h>.6?C.yel:C.line),q?3:1.5);tx(w,x,WY,{s:15,w:700,c:q?C.yel:C.ink})});
+  if(this.a2>0)ga(this.a2,()=>W.forEach((w,j)=>{if(j!==qi)tx('🔑 '+(this.KEYW[w]||''),this.X(j),WY+32,{s:11,c:C.sky})}));
+  const BY=440;
+  if(this.a3>0){const ms=Math.max(...this.sc);ln(40,BY,1060,BY,C.dim,1);
+    tx(this.a4>.5?'📊 Attention (%) — all bars add up to 100%':'📊 Match score (Query · Key)',40,314,{a:'left',s:13,w:700,c:this.a4>.5?C.yel:C.vio});
+    W.forEach((w,j)=>{const x=this.X(j),me=j===qi,h=lerp(this.sc[j]/ms*90,Math.min(95,P[j]*180),this.a4)*this.a3;
+      rr(x-20,BY-h,40,Math.max(h,.1),5,me?'#475569':(this.a4>.5?C.yel:C.vio));
+      tx(this.a4>.5?Math.round(P[j]*100)+'%':this.sc[j].toFixed(1),x,BY-h-10,{s:12,w:700,c:me?C.mut:C.ink});if(me)tx('(itself)',x,BY+12,{s:10,c:C.mut})})}
+  if(this.a5>0)ga(this.a5,()=>{tx(`🧪 New meaning of “${W[qi]}” = a mix of the words’ Values:`,40,466,{a:'left',s:14,w:700});
+    const ord=P.map((v,j)=>[v,j]).sort((a,b)=>b[0]-a[0]);let x=40;
+    ord.forEach(([v,j],r)=>{const w=1020*v*this.a5;rr(x,482,Math.max(w-2,.1),40,6,j===qi?'#475569':PAL[r%6]);if(w>70)tx(`${W[j]} ${Math.round(v*100)}%`,x+w/2,502,{s:12,w:700,c:'#0f172a'});x+=w})});
+}});
+
+/* ---------- 12. RNN vs Transformer race ---------- */
+scene({id:'race',group:'Transformers',icon:'🏁',short:'RNN vs Transformer',
+title:'Why Transformers replaced RNNs',
+sub:'Two big reasons: Transformers read all words at once (fast), and every word can directly see every other word (long memory).',gap:1200,
+story:'An RNN is like <b>one cashier</b> serving a long queue one customer at a time. A Transformer opens <b>a counter for every customer</b> — everyone is served at the same time.',
+keys:['RNN / LSTM: reads words <b>one after another</b> → slow, can’t use the GPU fully.','Transformer: reads <b>all words together</b> → much faster training on GPUs.','RNN: information from an early word must pass through every step to reach the end — it <b>fades</b>.','Transformer: any two words are <b>directly connected</b> by attention.','That is why ChatGPT, Gemini, BERT and LLaMA are all Transformers.'],
+W:['The','cat','that','the','dog','chased','was','very','fast'],
+X(i){return 110+i*110},
+init(){this.ph=0;this.rp=0;this.tp=0;this.lp=0;this.sa=0;
+  say('Both models must read the same sentence: “<b>The cat that the dog chased was very fast</b>”. Top lane = RNN / LSTM, bottom lane = Transformer. Press <b>Step</b> to start the race! 🏁')},
+step(){
+  if(this.ph===0){this.ph=1;tween(700,(_,p)=>this.tp=p);tween(9*650,(_,p)=>this.rp=p,()=>say('🏁 <b>Race over!</b> The RNN needed <b>9 steps, one after another</b> — each word had to wait for the previous one. The Transformer handled <b>all 9 words in 1 step</b>, side by side. On a GPU this makes training many times faster. 🚀'));
+    say('<b>Go!</b> The RNN must finish word 1 before it can start word 2, and so on… The Transformer reads all the words at the same time.');return}
+  if(this.ph===1){this.ph=2;tween(3200,(_,p)=>this.lp=p);
+    say('<b>Long-distance link</b>: who was fast? The <b>cat</b>, not the dog! To understand “fast”, the model must connect it to “cat”, 7 words earlier. In the RNN the memory of “cat” passes through 7 steps and <b>fades</b> (red %). In the Transformer, “fast” looks <b>directly</b> at “cat” — one hop, nothing lost.');return}
+  if(this.ph===2){this.ph=3;tween(800,p=>this.sa=p);
+    say('<b>Summary</b>: Transformers train faster and remember long context better — that is why modern AI language models use them. Their one weak point: every word compares itself with every other word, which needs more memory for very long texts.');return}
+  return'end'},
+draw(){const W=this.W,n=W.length;panel(15,12,1070,262);panel(15,286,1070,262);
+  tx('🐢 RNN / LSTM — one word at a time',35,38,{a:'left',s:16,w:700,c:C.org});
+  const k=Math.min(n,Math.floor(this.rp*n+1e-6)),used=this.rp>0?Math.min(n,Math.ceil(this.rp*n-1e-6)):0;
+  tx(`⏱ steps: ${used}`,1065,38,{a:'right',s:16,w:700,c:C.org});
+  for(let i=0;i<n;i++){const x=this.X(i),done=i<k,act=i===k&&this.rp>0&&this.rp<1,hl=this.ph>=2&&(i===1||i===8);
+    if(i<n-1)arrow(x+36,140,x+72,140,done?C.org:C.dim,2,7);
+    rr(x-36,115,72,50,10,done?'rgba(251,146,60,.22)':'#1b2748',act?C.yel:(done?C.org:C.line),act?3:1.5);
+    if(done)tx('✓',x,140,{s:18,w:800,c:C.org});else if(act)tx('…',x,140,{s:18,w:800,c:C.yel});
+    arrow(x,184,x,168,C.dim,1.5,6);tx(W[i],x,196,{s:14,w:700,c:hl?C.yel:(done||act?C.ink:C.mut)})}
+  if(this.ph>=2){const pos=1+this.lp*7;tx('memory of “cat” →',35,232,{a:'left',s:12,c:C.mut});
+    for(let j=1;j<=Math.min(8,Math.floor(pos+1e-6));j++){const s=Math.pow(.7,j-1);tx(Math.round(s*100)+'%',this.X(j),232,{s:13,w:700,c:rgba(C.red,.35+.65*s)})}
+    const s=Math.pow(.7,pos-1),f=Math.floor(pos);circ(lerp(this.X(f),this.X(Math.min(8,f+1)),pos-f),98,4+8*s,rgba(C.yel,.3+.7*s))}
+  tx('🚀 Transformer — all words at once',35,312,{a:'left',s:16,w:700,c:C.sky});
+  tx(`⏱ steps: ${this.tp>0?1:0}`,1065,312,{a:'right',s:16,w:700,c:C.sky});
+  const WY=490;
+  if(this.tp>0)for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const x1=this.X(i),x2=this.X(j);ctx.beginPath();ctx.moveTo(x1,WY-18);ctx.quadraticCurveTo((x1+x2)/2,WY-18-(j-i)*24,x2,WY-18);ctx.strokeStyle=rgba(C.sky,.18*this.tp);ctx.lineWidth=1.2;ctx.stroke()}
+  if(this.ph>=2){const a=clamp(this.lp*3,0,1),x1=this.X(1),x2=this.X(8),mx=(x1+x2)/2;ctx.beginPath();ctx.moveTo(x1,WY-18);ctx.quadraticCurveTo(mx,WY-18-168,x2,WY-18);ctx.strokeStyle=rgba(C.yel,a);ctx.lineWidth=5;ctx.stroke();
+    ga(a,()=>{rr(mx-90,WY-136,180,26,8,'rgba(2,6,23,.92)',C.yel);tx('direct link · 100%',mx,WY-123,{s:13,w:700,c:C.yel})})}
+  for(let i=0;i<n;i++){const x=this.X(i),hl=this.ph>=2&&(i===1||i===8);rr(x-44,WY-16,88,32,8,this.tp>0?rgba(C.sky,.12+.2*this.tp):'#0b1222',hl?C.yel:(this.tp>0?C.sky:C.line),hl?2.5:1.5);tx(W[i],x,WY,{s:14,w:700,c:hl?C.yel:C.ink})}
+  tx('every word is connected to every other word (attention)',550,530,{s:12,c:C.mut});
+  if(this.sa>0)ga(this.sa,()=>{rr(150,60,800,440,16,'rgba(2,6,23,.96)',C.yel,2);tx('Summary',550,92,{s:18,w:800,c:C.yel});
+    const R=[['','🐢 RNN / LSTM','🚀 Transformer'],['Reads words','one by one','all at the same time'],['Training speed','slow','fast (parallel on GPUs)'],['Long memory','fades with distance','direct link to any word'],['Used today in','small & time-series tasks','ChatGPT, Gemini, BERT, translation']];
+    R.forEach((r,i)=>{const y=140+i*70;if(i)ln(180,y-35,920,y-35,C.dim,1);tx(r[0],190,y,{a:'left',s:15,w:700,c:C.mut});tx(r[1],520,y,{s:15,w:i?400:700,c:i?C.ink:C.org});tx(r[2],790,y,{s:15,w:i?400:700,c:i?C.ink:C.sky})})});
+}});
+
+/* ---------- 13. Transformer translation ---------- */
+scene({id:'transformer',group:'Transformers',icon:'⚡',short:'Transformer (Translation)',
+title:'Transformer — translating “I am a student” into Hindi',
+sub:'The Encoder reads and understands the whole English sentence. The Decoder then writes the Hindi sentence one word at a time.',gap:1300,
+story:'Like a human translator: first <b>read the whole sentence</b> and understand it (Encoder 📖). Then <b>write the translation word by word</b>, glancing back at the English words that matter for each new word (Decoder ✍️).',
+keys:['Transformer = <b>Encoder</b> (reads & understands) + <b>Decoder</b> (writes the output).','Words → numbers (<b>embeddings</b>) + their <b>position</b> (1st, 2nd, 3rd…).','Encoder: <b>self-attention</b> — all words look at each other at once.','Decoder: writes <b>one word at a time</b>, looking at what it wrote so far and back at the English words (<b>cross-attention</b>).','BERT = encoder only · GPT / ChatGPT = decoder only · translators = both.','Percentages shown are illustrative.'],
+SRC:['I','am','a','student'],SX:[110,220,330,440],OX:[610,694,778,862,946,1030],
+OUT:[
+ {w:'मैं',c:[['मैं',.86],['हम',.06],['तुम',.04],['वह',.02]],a:[.78,.12,.02,.08],n:'It starts from a <b>&lt;start&gt;</b> signal and looks back mostly at “<b>I</b>” (thick yellow line) → best choice <b>“मैं”</b> (86%). Note: the decoder may only look at words it has <b>already written</b>, never at future ones.'},
+ {w:'एक',c:[['एक',.79],['छात्र',.1],['हूँ',.05],['मैं',.02]],a:[.05,.08,.72,.15],n:'Now it looks mostly at “<b>a</b>” → <b>“एक”</b> (79%).'},
+ {w:'छात्र',c:[['छात्र',.83],['विद्यार्थी',.12],['लड़का',.03],['हूँ',.01]],a:[.05,.07,.1,.78],n:'It looks at “<b>student</b>” → <b>“छात्र”</b> (83%). “विद्यार्थी” was also a fair option (12%).'},
+ {w:'हूँ',c:[['हूँ',.88],['है',.07],['था',.03],['हो',.01]],a:[.25,.65,.03,.07],n:'In Hindi the verb comes <b>at the end</b>, so now it looks back at “<b>am</b>” (the 2nd English word!) → <b>“हूँ”</b>. Attention handles changes in word order easily.'},
+ {w:'<end>',c:[['<end>',.94],['।',.04],['और',.01],['भी',.01]],a:[.25,.25,.25,.25],n:'It outputs <b>&lt;end&gt;</b> — the translation is complete: <b>“मैं एक छात्र हूँ”</b> ✅'}],
+init(){this.ph=0;this.a1=this.a2=this.a3=0;this.k=0;this.di=-1;this.dp=0;this.fin=0;
+  this.emb=this.SRC.map(w=>{seed=hashStr(w);return[...Array(8)].map(()=>randn()*.8)});
+  this.und=this.SRC.map(w=>{seed=hashStr(w+'#');return[...Array(8)].map(()=>randn()*.8)});
+  say('We want to translate “<b>I am a student</b>” into Hindi. A Transformer has two parts: the <b>Encoder</b> (left, the reader) and the <b>Decoder</b> (right, the writer). Press <b>Step</b>.')},
+step(){const N=this.OUT.length;
+  if(this.ph===0){this.ph=1;tween(700,p=>this.a1=p);say('Step 1 — <b>Split into tokens</b>: the sentence is cut into pieces (words or parts of words): “I”, “am”, “a”, “student”.');return}
+  if(this.ph===1){this.ph=2;tween(900,p=>this.a2=p);say('Step 2 — <b>Words → numbers</b>. Computers only understand numbers, so each word becomes a list of numbers called an <b>embedding</b> (coloured stripes). We also add its <b>position</b> (yellow 1, 2, 3, 4), because attention by itself doesn’t know the word order.');return}
+  if(this.ph===2){this.ph=3;tween(1600,p=>this.a3=p);say('Step 3 — <b>Encoder</b>: using self-attention, every English word looks at every other word <b>at the same time</b> (blue arcs). Out comes an improved “understanding” of each word — the new stripes above the encoder.');return}
+  if(this.k<N){this.di=this.k;this.dp=0;const o=this.OUT[this.di];tween(2600,(_,p)=>this.dp=p,()=>{this.k=this.di+1});say(`Step ${4+this.di} — <b>Decoder writes word ${this.di+1}</b>: ${o.n}`);return}
+  if(!this.fin){this.fin=1;say('🎉 <b>Done!</b> <b>Encoder</b> = reader 📖 (understands the input). <b>Decoder</b> = writer ✍️ (produces one word at a time). <b>ChatGPT</b> is a decoder-only Transformer that keeps predicting the next word — just like this decoder. <b>BERT</b> is encoder-only (great at understanding text).');return}
+  return'end'},
+draw(){const S=this.SX,O=this.OX,N=this.OUT.length;panel(15,12,1070,536);
+  const inProg=this.di>=0&&this.k===this.di,si=inProg?this.di:this.k-1,dp=inProg?this.dp:1;
+  tx('English input:  “I am a student”',40,44,{a:'left',s:15,w:700});
+  const ow=this.OUT.slice(0,this.k).map(o=>o.w).filter(w=>w!=='<end>');
+  tx('Hindi output:  “'+(ow.join(' ')||'…')+(this.k<N&&ow.length?' …':'')+'”',40,76,{a:'left',s:15,w:700,c:this.k>=N?C.grn:C.ink});
+  rr(50,250,460,130,14,'rgba(56,189,248,.07)',C.sky,2);tx('📖 ENCODER (reader)',66,268,{a:'left',s:14,w:800,c:C.sky});tx('all words look at each other',494,268,{a:'right',s:11,c:C.mut});
+  rr(575,250,490,130,14,'rgba(244,114,182,.07)',C.pink,inProg&&dp<.6?3.5:2);tx('✍️ DECODER (writer)',591,268,{a:'left',s:14,w:800,c:C.pink});tx('writes one word at a time',1049,268,{a:'right',s:11,c:C.mut});
+  tx('① looks at the Hindi words written so far (pink arcs)',820,310,{s:13,c:C.pink});tx('② looks back at the English words (yellow lines)',820,336,{s:13,c:C.yel});
+  S.forEach((x,i)=>{ga(.35+.65*this.a1,()=>{rr(x-45,484,90,32,8,'#0b1222',C.org,2);tx(this.SRC[i],x,500,{s:15,w:700,c:C.org})});
+    if(this.a2>0)ga(this.a2,()=>{arrow(x,482,x,456,C.line,1.5,7);this.emb[i].forEach((v,j)=>{ctx.fillStyle=heat(v,1.2);ctx.fillRect(x-40+j*10,430,9,22)});circ(x+50,430,10,C.yel);tx(String(i+1),x+50,431,{s:11,w:800,c:'#0f172a'});arrow(x,428,x,384,C.line,1.5,7)})});
+  if(this.a3>0){for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){const x1=S[i],x2=S[j];ctx.beginPath();ctx.moveTo(x1,362);ctx.quadraticCurveTo((x1+x2)/2,362-(x2-x1)*.4,x2,362);ctx.strokeStyle=rgba(C.sky,(.35+.3*Math.sin(T*3+i+j))*this.a3);ctx.lineWidth=2;ctx.stroke()}S.forEach(x=>circ(x,362,5,C.sky))}
+  const ua=clamp(this.a3*2-1,0,1);
+  if(ua>0)ga(ua,()=>{S.forEach((x,i)=>{arrow(x,250,x,226,C.line,1.5,7);this.und[i].forEach((v,j)=>{ctx.fillStyle=heat(v,1.2);ctx.fillRect(x-40+j*10,200,9,22)})});tx('← understanding',488,211,{a:'left',s:12,c:C.sky})});
+  rr(720,24,345,190,12,C.pan,'#334155',1);tx('Next word — top 4 choices',735,42,{a:'left',s:13,w:700,c:C.mut});
+  if(si<0)tx('waiting for the encoder…',892,120,{s:13,c:C.mut});
+  if(si>=0){const o=this.OUT[si],q1=inProg?clamp(dp/.3,0,1):1,q2=inProg?clamp((dp-.3)/.3,0,1):1,q3=inProg?clamp((dp-.6)/.35,0,1):1;
+    S.forEach((x,i)=>{const a=o.a[i];ctx.beginPath();ctx.moveTo(x,198);ctx.quadraticCurveTo((x+700)/2,140,700,250);ctx.strokeStyle=rgba(C.yel,(.12+.88*a)*q1);ctx.lineWidth=1+12*a*q1;ctx.stroke();
+      ga(q1,()=>tx(Math.round(a*100)+'%',x-46,211,{a:'right',s:11,w:700,c:C.yel}))});
+    o.c.forEach(([w,pr],j)=>{const y=74+j*34;tx(w,735,y,{a:'left',s:15,w:700,c:j===0?C.grn:C.ink});rr(840,y-10,160,20,6,'#1e293b');if(pr*q2>.003)rr(840,y-10,160*pr*q2,20,6,j===0?C.grn:C.vio);ga(q2,()=>tx(Math.round(pr*100)+'%',1008,y,{a:'left',s:13,w:700}))});
+    arrow(900,248,900,218,C.pink,2);
+    if(inProg)for(let j=0;j<=si;j++){const x1=O[si+1],x2=O[j];ctx.beginPath();ctx.moveTo(x1,482);ctx.quadraticCurveTo((x1+x2)/2,472-Math.abs(x1-x2)*.25,x2,482);ctx.strokeStyle=rgba(C.pink,.55*q1);ctx.lineWidth=1.5;ctx.stroke()}
+    if(inProg&&q3<1){ctx.save();ctx.setLineDash([5,4]);rr(O[si+1]-39,484,78,32,8,null,C.pink,1.5);ctx.restore();tx('?',O[si+1],500,{s:15,w:700,c:C.pink})}
+    if(inProg&&q3>0&&q3<1){const x=lerp(790,O[si+1],q3),y=lerp(74,500,q3);rr(x-39,y-16,78,32,8,'rgba(74,222,128,.25)',C.grn,2);tx(o.w,x,y,{s:o.w.length>5?12:15,w:700})}}
+  for(let i=0;i<=Math.min(this.k,N);i++){const x=O[i],w=i===0?'<start>':this.OUT[i-1].w;rr(x-39,484,78,32,8,'#0b1222',i===0?C.mut:C.pink,2);tx(w,x,500,{s:w.length>5?12:15,w:700,c:i===0?C.mut:C.ink});arrow(x,482,x,384,rgba(C.pink,.6),1.5,7)}
+  if(this.fin){rr(40,96,640,42,12,'rgba(2,6,23,.94)',C.grn,2);tx('✅ Encoder understands  →  Decoder writes one word at a time',360,117,{s:15,w:700,c:C.grn})}
+}});
+
+/* ===================== BOOT ===================== */
+const bPlay=document.getElementById('bPlay'),bStep=document.getElementById('bStep'),bReset=document.getElementById('bReset'),bFull=document.getElementById('bFull'),speedEl=document.getElementById('speed');
+function setPlay(v){playing=v;bPlay.textContent=v?'⏸ Pause':'▶ Play'}
+function load(i){idx=(i+scenes.length)%scenes.length;S=scenes[idx];tweens=[];setPlay(false);acc=0;extra.innerHTML='';
+  document.getElementById('title').textContent=(S.icon?S.icon+' ':'')+S.title;document.getElementById('sub').textContent=S.sub;
+  document.getElementById('keys').innerHTML=(S.story?`<div class="story"><h4>🧒 Think of it like this</h4><p>${S.story}</p></div>`:'')+'<h4>📌 Remember</h4><ul>'+S.keys.map(k=>`<li>${k}</li>`).join('')+'</ul>';
+  scenes.forEach(s=>s.btn&&s.btn.classList.toggle('on',s===S));cv.style.cursor=S.click?'pointer':'default';
+  S.init();if(S.ui)S.ui();if(location.hash!=='#'+S.id)history.replaceState(null,'','#'+S.id)}
+function reset(){tweens=[];setPlay(false);acc=0;S.init()}
+function frame(now){let dt=Math.min(64,now-last);last=now;dt*=speed;T+=dt/1000;
+  runTw(dt);
+  if(playing&&!busy()){acc+=dt;if(acc>=(S.gap??700)){acc=0;if(S.step()==='end')setPlay(false)}}
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+  try{S.draw()}catch(e){console.error(e)}
+  requestAnimationFrame(frame)}
+bPlay.onclick=()=>{if(playing)setPlay(false);else{setPlay(true);acc=1e9}};
+bStep.onclick=()=>{setPlay(false);flush();S.step()};
+bReset.onclick=reset;
+speedEl.oninput=()=>{speed=+speedEl.value;document.getElementById('spv').textContent=speed+'×'};
+bFull.onclick=()=>{const st=document.getElementById('stage');if(document.fullscreenElement)document.exitFullscreen();else if(st.requestFullscreen)st.requestFullscreen()};
+function cpos(e){const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]}
+cv.addEventListener('click',e=>{if(S.click)S.click(...cpos(e))});
+cv.addEventListener('mousemove',e=>{if(S.move)S.move(...cpos(e))});
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)&&e.target.type!=='range'&&e.target.type!=='checkbox')return;
+  const k=e.key.toLowerCase();
+  if(e.code==='Space'){e.preventDefault();bPlay.click()}else if(e.key==='ArrowRight'){e.preventDefault();bStep.click()}
+  else if(k==='r')reset();else if(k==='n')load(idx+1);else if(k==='p')load(idx-1);else if(k==='f')bFull.click()});
+addEventListener('hashchange',()=>{const i=scenes.findIndex(s=>'#'+s.id===location.hash);if(i>=0&&i!==idx)load(i)});
+(function(){const m=document.getElementById('menu');let g='';scenes.forEach((s,i)=>{if(s.group!==g){g=s.group;const d=document.createElement('div');d.className='grp';d.textContent=g;m.appendChild(d)}
+  const b=document.createElement('button');b.className='sc';b.innerHTML=`<span class="n">${i+1}</span>${s.icon||''} ${s.short||s.title}`;b.onclick=()=>load(i);s.btn=b;m.appendChild(b)})})();
+const hi=scenes.findIndex(s=>'#'+s.id===location.hash);load(hi>=0?hi:0);requestAnimationFrame(frame);
+</script>
+</body>
+</html>

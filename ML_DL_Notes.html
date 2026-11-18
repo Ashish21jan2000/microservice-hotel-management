@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning &amp; Deep Learning - Easy Notes for Beginners | Vision Shiksha Academy</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#fff;--ink:#1f2937;--muted:#6b7280;--sup:#2563eb;--uns:#16a34a;--dl:#9333ea;--rnn:#ea580c;--tf:#db2777;--code:#0f172a}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;font-size:16.5px}
+  header{background:linear-gradient(120deg,#1e3a8a,#6d28d9 55%,#be185d);color:#fff;padding:38px 20px 30px;text-align:center}
+  header h1{margin:0;font-size:2.1rem}
+  header p{margin:6px 0 0;opacity:.92}
+  header .cta{display:inline-block;margin:14px 6px 0;background:#fff;color:#6d28d9;font-weight:700;text-decoration:none;padding:8px 18px;border-radius:999px}
+  nav{position:sticky;top:0;z-index:9;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:8px}
+  nav a,nav button{text-decoration:none;color:var(--ink);font-size:.86rem;padding:4px 11px;border-radius:999px;background:#eef0f8;border:0;cursor:pointer;font-family:inherit}
+  nav a:hover{background:#6d28d9;color:#fff}
+  nav button{background:#fde68a;font-weight:700}
+  main{max-width:1000px;margin:0 auto;padding:20px}
+  h2{margin:46px 0 8px;padding:8px 14px;border-left:8px solid var(--sup);background:#fff;border-radius:8px;font-size:1.55rem;scroll-margin-top:110px}
+  .card[id]{scroll-margin-top:110px}
+  h2.uns{border-color:var(--uns)} h2.dl{border-color:var(--dl)} h2.rnn{border-color:var(--rnn)} h2.tf{border-color:var(--tf)}
+  h3{margin:22px 0 6px;font-size:1.25rem}
+  .card{background:var(--card);border-radius:14px;padding:18px 22px;margin:14px 0;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .card h3{margin-top:0}
+  .one{background:#fef9c3;border-left:6px solid #eab308;padding:10px 14px;border-radius:8px;margin:10px 0;font-size:1.05rem}
+  .life{background:#ecfdf5;border-left:6px solid #16a34a;padding:10px 14px;border-radius:8px;margin:10px 0}
+  .think{background:#eff6ff;border-left:6px solid #3b82f6;padding:10px 14px;border-radius:8px;margin:10px 0}
+  .warn{background:#fff7ed;border-left:6px solid #ea580c;padding:10px 14px;border-radius:8px;margin:10px 0}
+  .remember{background:#f5f3ff;border:2px dashed #8b5cf6;padding:10px 16px;border-radius:10px;margin:12px 0}
+  .remember b:first-child{color:#6d28d9}
+  .formula{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:1.12rem;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 16px;margin:10px 0;text-align:center;overflow-x:auto}
+  pre{background:var(--code);color:#e2e8f0;padding:14px;border-radius:10px;overflow:auto;font-size:.86rem;line-height:1.5;margin:10px 0}
+  pre .c{color:#94a3b8} pre .k{color:#f472b6} pre .s{color:#86efac} pre .n{color:#fbbf24}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.95rem}
+  th,td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#f1f5f9}
+  tr:nth-child(even) td{background:#fafbff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.8rem;font-weight:700;color:#fff}
+  .p-sup{background:var(--sup)} .p-uns{background:var(--uns)} .p-dl{background:var(--dl)}
+  .flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .flow span{background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:6px 11px;font-size:.92rem}
+  .flow b{color:#6366f1;font-size:1.1rem}
+  svg{max-width:100%;height:auto}
+  .watch{display:inline-block;margin:6px 6px 0 0;background:#6d28d9;color:#fff;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:.9rem;font-weight:600}
+  .watch:hover{background:#4c1d95}
+  details{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 14px;margin:10px 0}
+  details summary{cursor:pointer;font-weight:600}
+  details.deep{background:#f8fafc;border:1px dashed #94a3b8}
+  details.deep>summary{color:#475569}
+  details.deep>summary::after{content:"  (optional — skip if you are new)";font-weight:400;font-size:.85rem;color:#94a3b8}
+  .algo{border-top:5px solid var(--sup)}
+  .algo.u{border-color:var(--uns)} .algo.d{border-color:var(--dl)} .algo.r{border-color:var(--rnn)} .algo.t{border-color:var(--tf)}
+  .tag{display:inline-block;font-size:.78rem;font-weight:700;background:#e0e7ff;color:#3730a3;border-radius:6px;padding:1px 8px;margin-right:4px}
+  .quiz .q{margin:14px 0}
+  .quiz .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .quiz button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.92rem;font-family:inherit}
+  .quiz button.right{background:#dcfce7;border-color:#16a34a}
+  .quiz button.wrong{background:#fee2e2;border-color:#dc2626}
+  .quiz .why{display:none;margin-top:6px;font-size:.92rem;color:#334155}
+  .quiz .why.show{display:block}
+  #score{font-weight:700;color:#6d28d9}
+  .day{border-top:5px solid var(--sup)} .day.d2{border-color:var(--uns)} .day.d3{border-color:var(--tf)}
+  footer{text-align:center;color:var(--muted);padding:30px 10px 40px;font-size:.9rem}
+  @media print{nav,.watch,header .cta{display:none}.card{box-shadow:none;border:1px solid #ddd;page-break-inside:avoid}details.deep{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🤖 Machine Learning &amp; 🧠 Deep Learning — Made Easy</h1>
+  <p>Supervised · Unsupervised · Neural Networks · RNN · LSTM · Transformer</p>
+  <p style="opacity:.8;font-size:.92rem">Vision Shiksha Academy — beginner-friendly notes with real-life examples</p>
+  <a class="cta" href="ML_DL_Animations.html">🎬 Open the Animated Lab</a>
+</header>
+<nav>
+  <a href="#start">Start Here</a><a href="#big">Big Picture</a><a href="#words">Jargon Buster</a><a href="#sup">Supervised</a><a href="#good">Is it Good?</a>
+  <a href="#uns">Unsupervised</a><a href="#nn">Neural Nets</a><a href="#rnn">RNN</a><a href="#lstm">LSTM</a><a href="#tf">Transformer</a>
+  <a href="#compare">Compare</a><a href="#quiz">Quiz</a><a href="#cheat">Revision</a>
+  <button id="expAll" type="button">🎓 Show all maths &amp; code</button>
+</nav>
+<main>
+
+<!-- ============ START HERE ============ -->
+<h2 id="start">👋 Start Here</h2>
+<div class="card">
+  <p><b>How to read these notes:</b> every topic follows the same simple pattern —</p>
+  <div class="flow"><span>💡 <b>In one line</b> — what it is</span><span>🏠 <b>Real-life example</b></span><span>🖼️ <b>Picture</b></span><span>🪜 <b>Steps</b> — how it works</span><span>🎬 <b>Watch</b> the animation</span></div>
+  <p>Grey dashed boxes marked <b>“optional”</b> contain maths and Python code. <b>If you are new, skip them on the first read.</b> Come back once the idea is clear. The yellow button in the menu opens all of them at once.</p>
+</div>
+<div class="grid3">
+  <div class="card day"><h3>Day 1 — Supervised</h3>
+    <ul><li>What is AI / ML / DL?</li><li>Jargon buster</li><li>Regression &amp; Classification</li><li>Linear Regression, KNN, Decision Tree</li><li>Is my model good?</li></ul>
+    <b>🎬 Watch:</b> 1 – 4</div>
+  <div class="card day d2"><h3>Day 2 — Unsupervised + Neural Nets</h3>
+    <ul><li>K-Means &amp; Elbow method</li><li>Hierarchical clustering</li><li>PCA</li><li>How a neural network learns</li></ul>
+    <b>🎬 Watch:</b> 5 – 8</div>
+  <div class="card day d3"><h3>Day 3 — RNN, LSTM, Transformer</h3>
+    <ul><li>RNN — reading in order</li><li>LSTM — smart memory</li><li>Attention &amp; Transformer</li><li>Quiz + revision</li></ul>
+    <b>🎬 Watch:</b> 9 – 13</div>
+</div>
+
+<!-- ============ BIG PICTURE ============ -->
+<h2 id="big">🌍 1. The Big Picture: AI, ML and DL</h2>
+<div class="card grid2">
+  <svg viewBox="0 0 320 250" aria-label="AI contains ML contains DL">
+    <ellipse cx="160" cy="125" rx="155" ry="118" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <ellipse cx="160" cy="145" rx="110" ry="88" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <ellipse cx="160" cy="168" rx="65" ry="52" fill="#f3e8ff" stroke="#9333ea" stroke-width="2"/>
+    <text x="160" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a8a">Artificial Intelligence</text>
+    <text x="160" y="85" text-anchor="middle" font-size="14" font-weight="700" fill="#166534">Machine Learning</text>
+    <text x="160" y="165" text-anchor="middle" font-size="14" font-weight="700" fill="#6b21a8">Deep Learning</text>
+    <text x="160" y="183" text-anchor="middle" font-size="10" fill="#6b21a8">RNN · LSTM · Transformer</text>
+  </svg>
+  <div>
+    <p><b>🤖 AI (Artificial Intelligence)</b> — any computer program that behaves “smartly”.</p>
+    <p><b>📚 ML (Machine Learning)</b> — a part of AI where the computer <b>learns from examples</b> instead of us writing every rule.</p>
+    <p><b>🧠 DL (Deep Learning)</b> — a part of ML that uses big <b>neural networks</b> (inspired by the brain). Great for images, speech and text.</p>
+  </div>
+</div>
+<div class="card">
+  <h3>Normal programming vs Machine Learning</h3>
+  <div class="grid2">
+    <div class="think"><b>👨‍💻 Normal programming</b><br>We write the rules ourselves.<br><i>“If the email contains ‘lottery’ or ‘free money’ → spam.”</i><br>Problem: spammers change words, and we can never write all the rules.</div>
+    <div class="life"><b>🤖 Machine learning</b><br>We give <b>10,000 example emails</b> marked “spam” / “not spam”. The computer <b>finds the rules by itself</b> — and keeps improving with new examples.</div>
+  </div>
+  <div class="one">💡 <b>In one line:</b> Normal programming = Rules + Data → Answers. &nbsp; Machine Learning = Data + Answers → Rules.</div>
+  <h3>The 3 main types of Machine Learning</h3>
+  <table>
+    <tr><th>Type</th><th>Simple meaning</th><th>Real-life example</th></tr>
+    <tr><td><span class="pill p-sup">Supervised</span></td><td>Learning <b>with answers</b> (like studying with an answer key)</td><td>Spam filter, house-price prediction</td></tr>
+    <tr><td><span class="pill p-uns">Unsupervised</span></td><td>Learning <b>without answers</b> — find groups or patterns</td><td>Grouping customers by shopping habits</td></tr>
+    <tr><td><span class="pill p-dl">Reinforcement</span></td><td>Learning by <b>trial and error</b> with rewards (like training a pet with treats)</td><td>Game-playing AI, self-driving practice</td></tr>
+  </table>
+  <a class="watch" href="ML_DL_Animations.html#intro">🎬 Watch: Supervised vs Unsupervised</a>
+  <details class="deep"><summary>🎓 Two more types &amp; the full ML workflow</summary>
+    <ul><li><b>Semi-supervised</b>: a few labelled examples + many unlabelled ones (e.g. a few X-rays checked by doctors).</li><li><b>Self-supervised</b>: the data creates its own answers — GPT learns by predicting the next word, BERT by filling in hidden words.</li></ul>
+    <div class="flow"><span>1. Define the problem</span><b>→</b><span>2. Collect data</span><b>→</b><span>3. Clean &amp; explore</span><b>→</b><span>4. Prepare features</span><b>→</b><span>5. Split train/test</span><b>→</b><span>6. Train</span><b>→</b><span>7. Evaluate</span><b>→</b><span>8. Improve</span><b>→</b><span>9. Deploy</span></div>
+  </details>
+</div>
+
+<!-- ============ JARGON ============ -->
+<h2 id="words">📖 2. Jargon Buster — big words, simple meanings</h2>
+<div class="card">
+  <p>Example used below: <b>predicting a house price</b> 🏠.</p>
+  <table>
+    <tr><th>Word</th><th>Simple meaning</th><th>House example</th></tr>
+    <tr><td><b>Data / Dataset</b></td><td>A table of examples</td><td>1,000 old house sales</td></tr>
+    <tr><td><b>Feature</b> (input, X)</td><td>A column we use to make the guess</td><td>Size, bedrooms, location</td></tr>
+    <tr><td><b>Label</b> (target, y)</td><td>The answer we want to predict</td><td>Price</td></tr>
+    <tr><td><b>Model</b></td><td>The “formula” the computer learns</td><td>price ≈ 20 × size + 8</td></tr>
+    <tr><td><b>Training</b></td><td>The model studying the examples</td><td>Learning from the 1,000 sales</td></tr>
+    <tr><td><b>Prediction</b></td><td>The model’s guess for new data</td><td>“This new house ≈ ₹72 lakh”</td></tr>
+    <tr><td><b>Loss / Error</b></td><td>How wrong a guess is</td><td>Guessed 70, real 75 → error 5</td></tr>
+    <tr><td><b>Weight</b> (parameter)</td><td>A number inside the model that it adjusts while learning</td><td>The “20” in 20 × size</td></tr>
+    <tr><td><b>Hyperparameter</b></td><td>A setting <b>we</b> choose before training</td><td>How fast to learn, how many neighbours (K)</td></tr>
+    <tr><td><b>Gradient descent</b></td><td>Improving step by step by going “downhill” on the error</td><td>Nudging the line until errors are smallest</td></tr>
+    <tr><td><b>Epoch</b></td><td>One full pass over all the training data</td><td>Studying all 1,000 sales once</td></tr>
+    <tr><td><b>Overfitting</b></td><td>Memorising the examples instead of learning the pattern</td><td>Perfect on old sales, bad on new houses</td></tr>
+    <tr><td><b>Underfitting</b></td><td>Model too simple to learn the pattern</td><td>Predicting the same price for every house</td></tr>
+    <tr><td><b>Train / Test set</b></td><td>Practice questions vs the final exam</td><td>800 sales to learn, 200 to test</td></tr>
+    <tr><td><b>Neural network</b></td><td>Many tiny calculators (neurons) connected in layers</td><td>—</td></tr>
+    <tr><td><b>Token</b></td><td>A piece of text (a word or part of a word)</td><td>“playing” → “play” + “ing”</td></tr>
+    <tr><td><b>Embedding</b></td><td>A word turned into a list of numbers</td><td>“king” → [0.2, −0.7, 0.5, …]</td></tr>
+  </table>
+</div>
+
+<!-- ============ SUPERVISED ============ -->
+<h2 id="sup">🎯 3. Supervised Learning — learning with answers</h2>
+<div class="card">
+  <div class="one">💡 <b>In one line:</b> We show the computer many examples <b>together with the correct answers</b>; it learns the pattern and then answers new questions by itself.</div>
+  <div class="life">🏠 <b>Real life:</b> A child learns fruits from a parent: “this is an apple 🍎, this is a banana 🍌”. After enough examples the child can name a fruit they have never seen before. The parent’s answers are the <b>labels</b>.</div>
+  <h3>How does it learn? (same for every model)</h3>
+  <div class="flow"><span>1️⃣ Make a <b>guess</b></span><b>→</b><span>2️⃣ <b>Check</b> it against the correct answer</span><b>→</b><span>3️⃣ See <b>how wrong</b> it was (error)</span><b>→</b><span>4️⃣ <b>Adjust</b> a little to be less wrong</span><b>→</b><span>🔁 repeat thousands of times</span></div>
+</div>
+
+<div class="card grid2">
+  <div>
+    <h3>📈 Regression = predict a <u>number</u></h3>
+    <ul><li>House price → ₹72.5 lakh</li><li>Tomorrow’s temperature → 31 °C</li><li>Next month’s sales</li></ul>
+    <svg viewBox="0 0 260 150"><line x1="20" y1="130" x2="250" y2="130" stroke="#94a3b8"/><line x1="20" y1="130" x2="20" y2="10" stroke="#94a3b8"/>
+      <g fill="#2563eb"><circle cx="40" cy="115" r="4"/><circle cx="65" cy="100" r="4"/><circle cx="90" cy="104" r="4"/><circle cx="115" cy="80" r="4"/><circle cx="140" cy="78" r="4"/><circle cx="165" cy="60" r="4"/><circle cx="190" cy="52" r="4"/><circle cx="215" cy="38" r="4"/><circle cx="235" cy="30" r="4"/></g>
+      <line x1="30" y1="122" x2="245" y2="24" stroke="#db2777" stroke-width="3"/><text x="150" y="146" font-size="11" text-anchor="middle" fill="#475569">draw a line through the dots</text></svg>
+  </div>
+  <div>
+    <h3>🏷️ Classification = predict a <u>category</u></h3>
+    <ul><li>Email → Spam / Not spam</li><li>X-ray → Pneumonia / Normal</li><li>Photo → Cat / Dog</li></ul>
+    <svg viewBox="0 0 260 150"><line x1="20" y1="130" x2="250" y2="130" stroke="#94a3b8"/><line x1="20" y1="130" x2="20" y2="10" stroke="#94a3b8"/>
+      <g fill="#2563eb"><circle cx="45" cy="40" r="4"/><circle cx="70" cy="30" r="4"/><circle cx="60" cy="65" r="4"/><circle cx="95" cy="50" r="4"/><circle cx="80" cy="85" r="4"/><circle cx="110" cy="28" r="4"/></g>
+      <g fill="#ea580c"><circle cx="160" cy="100" r="4"/><circle cx="190" cy="80" r="4"/><circle cx="210" cy="110" r="4"/><circle cx="140" cy="115" r="4"/><circle cx="225" cy="70" r="4"/><circle cx="175" cy="118" r="4"/></g>
+      <line x1="60" y1="125" x2="230" y2="18" stroke="#16a34a" stroke-width="3" stroke-dasharray="6 4"/><text x="150" y="146" font-size="11" text-anchor="middle" fill="#475569">draw a border between groups</text></svg>
+  </div>
+</div>
+<div class="remember"><b>Trick to remember:</b> Answer is a <b>number</b> (how much? how many?) → Regression. Answer is a <b>name / type</b> (which one? yes or no?) → Classification.</div>
+
+<div class="card algo">
+  <h3>① Linear Regression <span class="tag">Regression</span></h3>
+  <div class="one">💡 <b>In one line:</b> Draw the <b>best straight line</b> through the data, then use the line to predict.</div>
+  <div class="life">🏠 <b>Example:</b> Bigger houses cost more. The line might say <b>price ≈ 20 × size + 8</b>. A 3,000 sq ft house → 20 × 3 + 8 = <b>₹68 lakh</b>.</div>
+  <p><b>🪜 How it learns (gradient descent):</b> start with a flat line → measure the errors (gaps between dots and line) → tilt/shift the line a little to reduce the errors → repeat until it can’t improve.</p>
+  <div class="think">⛰️ <b>Think of it like:</b> walking down a hill in fog. You can’t see the bottom, so you feel the slope under your feet and take a small step downhill each time. The <b>learning rate</b> is your step size: too small = very slow, too big = you jump over the valley.</div>
+  <a class="watch" href="ML_DL_Animations.html#linreg">🎬 Watch: the line learning step by step</a>
+  <details class="deep"><summary>🧮 Maths &amp; code</summary>
+    <div class="formula">ŷ = w·x + b &nbsp;&nbsp;&nbsp; Error (MSE) = (1/n) Σ (y − ŷ)² &nbsp;&nbsp;&nbsp; w ← w − α·∂Error/∂w</div>
+<pre><span class="k">from</span> sklearn.linear_model <span class="k">import</span> LinearRegression
+model = LinearRegression().fit(X_train, y_train)     <span class="c"># learn</span>
+print(model.coef_, model.intercept_)                <span class="c"># w and b</span>
+print(model.predict([[<span class="n">3.0</span>]]))                         <span class="c"># price of a 3,000 sq ft house</span></pre>
+  </details>
+</div>
+
+<div class="card algo">
+  <h3>② Logistic Regression <span class="tag">Classification</span></h3>
+  <div class="one">💡 <b>In one line:</b> Despite its name, it answers <b>yes/no</b> questions by giving a <b>probability</b> between 0% and 100%.</div>
+  <div class="grid2">
+    <div>
+      <div class="life">📧 <b>Example:</b> “This email is <b>92%</b> likely to be spam” → above 50% → mark as spam.</div>
+      <p>It uses an <b>S-shaped curve</b> (called <i>sigmoid</i>) that squeezes any number into the range 0 → 1.</p>
+    </div>
+    <svg viewBox="0 0 260 160"><line x1="10" y1="140" x2="250" y2="140" stroke="#94a3b8"/><line x1="130" y1="10" x2="130" y2="150" stroke="#94a3b8"/>
+      <line x1="10" y1="20" x2="250" y2="20" stroke="#cbd5e1" stroke-dasharray="4"/><line x1="10" y1="80" x2="250" y2="80" stroke="#cbd5e1" stroke-dasharray="4"/>
+      <path d="M10 139 C 90 139, 100 136, 115 110 S 140 30, 170 22 S 230 20, 250 20" fill="none" stroke="#2563eb" stroke-width="3"/>
+      <text x="200" y="14" font-size="10" fill="#475569">100% (yes)</text><text x="200" y="76" font-size="10" fill="#475569">50%</text><text x="200" y="136" font-size="10" fill="#475569">0% (no)</text></svg>
+  </div>
+  <details class="deep"><summary>🧮 Maths</summary><div class="formula">σ(z) = 1 / (1 + e<sup>−z</sup>), &nbsp; z = w·x + b &nbsp;&nbsp;&nbsp; Loss = −[y log ŷ + (1−y) log(1−ŷ)]</div></details>
+</div>
+
+<div class="card algo">
+  <h3>③ K-Nearest Neighbours (KNN) <span class="tag">Classification</span></h3>
+  <div class="one">💡 <b>In one line:</b> “Tell me who your neighbours are, and I’ll tell you who you are.”</div>
+  <div class="life">🏏 <b>Example:</b> You move to a new street and want to guess which IPL team people there support. You ask your <b>5 nearest neighbours</b>: 4 say CSK, 1 says MI → your guess is <b>CSK</b>.</div>
+  <p><b>🪜 Steps:</b> ① measure the distance from the new point to every known point → ② pick the <b>K closest</b> → ③ majority vote wins.</p>
+  <div class="warn">⚠️ K is chosen by us. Too small (K=1) → one odd neighbour can fool you. Too big → the answer becomes too general. Odd numbers (3, 5, 7) avoid ties.</div>
+  <a class="watch" href="ML_DL_Animations.html#knn">🎬 Watch: neighbours voting</a>
+  <details class="deep"><summary>🧮 Maths &amp; code</summary>
+    <div class="formula">distance = √( (x₁ − x₂)² + (y₁ − y₂)² )</div>
+<pre><span class="k">from</span> sklearn.neighbors <span class="k">import</span> KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=<span class="n">5</span>).fit(X_train, y_train)
+print(knn.predict(X_test[:<span class="n">3</span>]))</pre>
+    <p>Always scale features first (e.g. <code>StandardScaler</code>), otherwise a big-number feature like salary dominates the distance.</p>
+  </details>
+</div>
+
+<div class="card algo">
+  <h3>④ Decision Tree <span class="tag">Both</span></h3>
+  <div class="grid2">
+    <div>
+      <div class="one">💡 <b>In one line:</b> A <b>flowchart of yes/no questions</b> that leads to an answer.</div>
+      <div class="life">🎮 <b>Like the game “20 Questions”:</b> you ask the question that splits things most cleanly first (“Is it an animal?”), then keep asking until you are sure.</div>
+      <p>At each step the tree tries <b>every possible question</b> and keeps the one that separates the classes best. “Best” is measured by <b>Gini</b> — how mixed a group is (0 = pure, 0.5 = totally mixed).</p>
+    </div>
+    <svg viewBox="0 0 280 190">
+      <rect x="85" y="5" width="110" height="34" rx="8" fill="#dbeafe" stroke="#2563eb"/><text x="140" y="27" text-anchor="middle" font-size="12">Income &gt; 50k?</text>
+      <line x1="115" y1="39" x2="65" y2="80" stroke="#64748b"/><line x1="165" y1="39" x2="215" y2="80" stroke="#64748b"/>
+      <text x="78" y="62" font-size="10" fill="#64748b">No</text><text x="192" y="62" font-size="10" fill="#64748b">Yes</text>
+      <rect x="10" y="80" width="110" height="34" rx="8" fill="#dbeafe" stroke="#2563eb"/><text x="65" y="102" text-anchor="middle" font-size="12">Age &lt; 25?</text>
+      <rect x="165" y="80" width="100" height="34" rx="8" fill="#dcfce7" stroke="#16a34a"/><text x="215" y="102" text-anchor="middle" font-size="12">✅ Give loan</text>
+      <line x1="40" y1="114" x2="30" y2="150" stroke="#64748b"/><line x1="90" y1="114" x2="110" y2="150" stroke="#64748b"/>
+      <rect x="0" y="150" width="70" height="32" rx="8" fill="#fee2e2" stroke="#dc2626"/><text x="35" y="171" text-anchor="middle" font-size="12">❌ Reject</text>
+      <rect x="80" y="150" width="80" height="32" rx="8" fill="#dcfce7" stroke="#16a34a"/><text x="120" y="171" text-anchor="middle" font-size="12">✅ Give loan</text>
+    </svg>
+  </div>
+  <div class="warn">⚠️ A very deep tree asks too many questions and <b>memorises</b> the training data (overfitting). Limit its depth.</div>
+  <a class="watch" href="ML_DL_Animations.html#tree">🎬 Watch: a tree choosing its questions</a>
+  <details class="deep"><summary>🧮 Maths</summary>
+    <div class="formula">Gini = 1 − Σ pₖ²</div>
+    <p>Group with 6 “yes” and 4 “no”: Gini = 1 − (0.6² + 0.4²) = 1 − 0.52 = <b>0.48</b> (quite mixed). Group with 10 “yes”: Gini = 1 − 1² = <b>0</b> (pure).</p>
+  </details>
+</div>
+
+<div class="card">
+  <h3>⑤ Other popular supervised algorithms — in one line each</h3>
+  <table>
+    <tr><th>Algorithm</th><th>Simple idea</th><th>Good for</th></tr>
+    <tr><td><b>Random Forest</b> 🌲🌲🌲</td><td>Build <b>many</b> decision trees on random parts of the data and let them vote (“wisdom of the crowd”).</td><td>Strong, reliable all-rounder</td></tr>
+    <tr><td><b>XGBoost / Gradient Boosting</b></td><td>Build trees <b>one after another</b>; each new tree fixes the mistakes of the previous ones.</td><td>Winner on table/Excel-type data</td></tr>
+    <tr><td><b>SVM</b> (Support Vector Machine)</td><td>Draw the border between classes with the <b>widest possible gap</b> (like the widest road between two villages).</td><td>Smaller datasets with many features</td></tr>
+    <tr><td><b>Naive Bayes</b></td><td>Uses probability: “emails with the word ‘lottery’ are usually spam”.</td><td>Very fast text / spam filtering</td></tr>
+  </table>
+</div>
+
+<!-- ============ IS IT GOOD ============ -->
+<h2 id="good">📏 4. Is my model good?</h2>
+<div class="card">
+  <h3>Train / Test split — practice vs final exam</h3>
+  <div class="life">📝 A teacher gives you <b>practice questions</b> (training data) and keeps <b>different questions for the final exam</b> (test data). If the exam had the same questions, you could pass by memorising — the exam would not show whether you really understood.</div>
+  <p>So we usually keep <b>~80%</b> of the data for training and hide <b>~20%</b> for testing.</p>
+  <h3>Overfitting vs Underfitting</h3>
+  <svg viewBox="0 0 690 170">
+    <g font-size="13" text-anchor="middle" font-weight="700"><text x="115" y="18">Underfit 😴 (too simple)</text><text x="345" y="18" fill="#16a34a">Good fit ✅</text><text x="575" y="18">Overfit 🤓 (memorised)</text></g>
+    <g fill="#2563eb">
+      <circle cx="30" cy="140" r="4"/><circle cx="60" cy="110" r="4"/><circle cx="90" cy="70" r="4"/><circle cx="120" cy="50" r="4"/><circle cx="150" cy="60" r="4"/><circle cx="180" cy="95" r="4"/><circle cx="205" cy="135" r="4"/>
+      <circle cx="260" cy="140" r="4"/><circle cx="290" cy="110" r="4"/><circle cx="320" cy="70" r="4"/><circle cx="350" cy="50" r="4"/><circle cx="380" cy="60" r="4"/><circle cx="410" cy="95" r="4"/><circle cx="435" cy="135" r="4"/>
+      <circle cx="490" cy="140" r="4"/><circle cx="520" cy="110" r="4"/><circle cx="550" cy="70" r="4"/><circle cx="580" cy="50" r="4"/><circle cx="610" cy="60" r="4"/><circle cx="640" cy="95" r="4"/><circle cx="665" cy="135" r="4"/></g>
+    <line x1="20" y1="100" x2="215" y2="90" stroke="#db2777" stroke-width="3"/>
+    <path d="M255 148 Q 345 -10 440 145" fill="none" stroke="#db2777" stroke-width="3"/>
+    <path d="M485 145 L520 105 L535 130 L550 65 L565 90 L580 45 L595 80 L610 55 L625 110 L640 90 L655 150 L668 130" fill="none" stroke="#db2777" stroke-width="3"/>
+  </svg>
+  <table>
+    <tr><th></th><th>😴 Underfitting</th><th>🤓 Overfitting</th></tr>
+    <tr><td>Student example</td><td>Didn’t study enough — fails practice <b>and</b> exam</td><td>Memorised practice answers — 100% in practice, fails the exam</td></tr>
+    <tr><td>How to fix</td><td>Use a more powerful model, add more useful features</td><td>Get more data, use a simpler model, stop training earlier</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>How do we score a classifier? 🔥 Fire-alarm example</h3>
+  <p>A fire alarm was tested 100 times:</p>
+  <table style="text-align:center">
+    <tr><th></th><th>Alarm rang 🔔</th><th>Alarm silent 🔕</th></tr>
+    <tr><th>Real fire 🔥</th><td style="background:#dcfce7"><b>40</b> ✅ correct</td><td style="background:#fee2e2"><b>5</b> ❌ missed a fire!</td></tr>
+    <tr><th>No fire</th><td style="background:#fee2e2"><b>10</b> ❌ false alarm</td><td style="background:#dcfce7"><b>45</b> ✅ correct</td></tr>
+  </table>
+  <table>
+    <tr><th>Score</th><th>Question it answers</th><th>Here</th></tr>
+    <tr><td><b>Accuracy</b></td><td>How often was it right overall?</td><td>(40 + 45) / 100 = <b>85%</b></td></tr>
+    <tr><td><b>Precision</b></td><td>When it rang, how often was there really a fire?</td><td>40 / 50 = <b>80%</b></td></tr>
+    <tr><td><b>Recall</b></td><td>Of all real fires, how many did it catch?</td><td>40 / 45 = <b>89%</b></td></tr>
+    <tr><td><b>F1-score</b></td><td>One number that balances precision and recall</td><td><b>84%</b></td></tr>
+  </table>
+  <div class="remember"><b>Which matters more?</b> Missing a fire (or a cancer case) is dangerous → care about <b>Recall</b>. Annoying false alarms (or good emails sent to spam) → care about <b>Precision</b>.</div>
+  <div class="warn">⚠️ <b>Accuracy can lie:</b> if only 1 in 100 people is sick, a lazy model that always says “healthy” is 99% accurate — but catches <b>zero</b> sick people.</div>
+  <details class="deep"><summary>🧮 Formulas, regression scores &amp; full code</summary>
+    <table>
+      <tr><th>Metric</th><th>Formula</th></tr>
+      <tr><td>Accuracy</td><td>(TP + TN) / All</td></tr><tr><td>Precision</td><td>TP / (TP + FP)</td></tr><tr><td>Recall</td><td>TP / (TP + FN)</td></tr><tr><td>F1</td><td>2 · P · R / (P + R)</td></tr>
+      <tr><td>MAE (regression)</td><td>average of |real − predicted|</td></tr><tr><td>RMSE (regression)</td><td>√ average of (real − predicted)²</td></tr><tr><td>R² (regression)</td><td>1 = perfect, 0 = no better than guessing the average</td></tr>
+    </table>
+    <p>TP = true positive (fire, rang) · FN = false negative (fire, silent) · FP = false positive (no fire, rang) · TN = true negative.</p>
+<pre><span class="k">from</span> sklearn.datasets <span class="k">import</span> load_breast_cancer
+<span class="k">from</span> sklearn.model_selection <span class="k">import</span> train_test_split
+<span class="k">from</span> sklearn.ensemble <span class="k">import</span> RandomForestClassifier
+<span class="k">from</span> sklearn.metrics <span class="k">import</span> classification_report, confusion_matrix
+
+X, y = load_breast_cancer(return_X_y=<span class="n">True</span>)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=<span class="n">0.2</span>, random_state=<span class="n">42</span>)
+
+model = RandomForestClassifier(n_estimators=<span class="n">200</span>, random_state=<span class="n">42</span>)
+model.fit(X_train, y_train)              <span class="c"># 1. learn from practice questions</span>
+pred = model.predict(X_test)             <span class="c"># 2. answer the exam</span>
+print(confusion_matrix(y_test, pred))    <span class="c"># 3. check the answers</span>
+print(classification_report(y_test, pred))</pre>
+  </details>
+</div>
+
+<!-- ============ UNSUPERVISED ============ -->
+<h2 id="uns" class="uns">🔍 5. Unsupervised Learning — learning without answers</h2>
+<div class="card">
+  <div class="one">💡 <b>In one line:</b> The data has <b>no answers (labels)</b>. The computer finds <b>groups and patterns</b> on its own.</div>
+  <div class="life">🧸 <b>Real life:</b> You empty a box of mixed toys on the floor. Nobody tells you their names, but you naturally make piles: cars here, dolls there, blocks over there. That is <b>clustering</b>.</div>
+  <table>
+    <tr><th>What it does</th><th>Simple meaning</th><th>Real example</th></tr>
+    <tr><td><b>Clustering</b></td><td>Put similar things in the same group</td><td>Group customers: “budget shoppers”, “premium buyers”…</td></tr>
+    <tr><td><b>Dimensionality reduction</b></td><td>Describe data with fewer numbers</td><td>Compress 100 survey questions into 3 key scores</td></tr>
+    <tr><td><b>Association rules</b></td><td>Find things that happen together</td><td>People who buy bread 🍞 often buy butter 🧈</td></tr>
+    <tr><td><b>Anomaly detection</b></td><td>Spot the odd one out</td><td>An unusual ₹2 lakh card payment at 3 am → fraud?</td></tr>
+  </table>
+</div>
+
+<div class="card algo u">
+  <h3>① K-Means Clustering</h3>
+  <div class="one">💡 <b>In one line:</b> Split the data into <b>K groups</b>, each with a centre point, so that every point is close to its own centre.</div>
+  <div class="life">👩‍🏫 <b>Classroom example:</b> A teacher says “make 3 teams”. She picks <b>3 captains at random</b>. Every student joins the <b>nearest captain</b>. Each captain then walks to the <b>middle of their team</b>. Students re-join whichever captain is now nearest… repeat until nobody switches.</div>
+  <p><b>🪜 Steps:</b></p>
+  <ol><li>Choose <b>K</b> (number of groups) and place K centres randomly.</li><li><b>Assign:</b> every point joins its nearest centre.</li><li><b>Move:</b> each centre moves to the middle of its points.</li><li>Repeat steps 2–3 until nothing changes.</li></ol>
+  <div class="grid2">
+    <div>
+      <p><b>How do I choose K? — the Elbow method.</b> Try K = 1, 2, 3 … and measure how spread out the groups are. Plot it: the curve drops fast and then flattens. The <b>bend (elbow)</b> is a good K.</p>
+    </div>
+    <svg viewBox="0 0 260 150"><line x1="30" y1="130" x2="250" y2="130" stroke="#94a3b8"/><line x1="30" y1="130" x2="30" y2="10" stroke="#94a3b8"/>
+      <polyline points="45,20 75,60 105,100 135,108 165,113 195,116 225,118" fill="none" stroke="#16a34a" stroke-width="3"/>
+      <g fill="#16a34a"><circle cx="45" cy="20" r="4"/><circle cx="75" cy="60" r="4"/><circle cx="105" cy="100" r="7" fill="#db2777"/><circle cx="135" cy="108" r="4"/><circle cx="165" cy="113" r="4"/><circle cx="195" cy="116" r="4"/><circle cx="225" cy="118" r="4"/></g>
+      <text x="112" y="88" font-size="11" fill="#db2777">elbow → K = 3</text><text x="140" y="146" font-size="10" text-anchor="middle" fill="#475569">number of groups (K)</text><text x="14" y="70" font-size="10" fill="#475569" transform="rotate(-90 14 70)">spread</text></svg>
+  </div>
+  <a class="watch" href="ML_DL_Animations.html#kmeans">🎬 Watch: K-Means step by step + Elbow</a>
+  <details class="deep"><summary>🧮 Maths &amp; code</summary>
+    <div class="formula">Spread (WCSS) = Σ (distance from each point to its centre)²</div>
+<pre><span class="k">from</span> sklearn.cluster <span class="k">import</span> KMeans
+<span class="k">for</span> k <span class="k">in</span> range(<span class="n">1</span>, <span class="n">9</span>):                            <span class="c"># elbow method</span>
+    km = KMeans(n_clusters=k, n_init=<span class="n">10</span>).fit(X)
+    print(k, km.inertia_)                       <span class="c"># inertia_ = spread (WCSS)</span>
+labels = KMeans(n_clusters=<span class="n">3</span>, n_init=<span class="n">10</span>).fit_predict(X)</pre>
+  </details>
+</div>
+
+<div class="card algo u">
+  <h3>② Hierarchical Clustering</h3>
+  <div class="one">💡 <b>In one line:</b> Keep <b>joining the two closest groups</b> until everything is one big group; the history forms a tree.</div>
+  <div class="life">🌳 <b>Like a family tree:</b> the two most similar people form a pair, pairs join into families, families into clans… The tree is called a <b>dendrogram</b>. Cut it with a horizontal line to get your groups — no need to choose K in advance.</div>
+  <a class="watch" href="ML_DL_Animations.html#hier">🎬 Watch: building the tree</a>
+</div>
+
+<div class="card algo u">
+  <h3>③ DBSCAN — clusters of any shape</h3>
+  <div class="one">💡 <b>In one line:</b> A group = a <b>crowded area</b>; points standing alone are marked as <b>noise</b>.</div>
+  <div class="life">🎡 <b>At a fair:</b> people standing close together form crowds (clusters) of any shape. The lonely person far away from everyone is an <b>outlier</b>.</div>
+</div>
+
+<div class="card algo u">
+  <h3>④ PCA — Principal Component Analysis</h3>
+  <div class="one">💡 <b>In one line:</b> Reduce many features to a few, while <b>keeping most of the information</b>.</div>
+  <div class="life">📸 <b>Photo example:</b> When you photograph a car, you choose the angle that shows the most detail (side view, not from the top). PCA chooses the “angle” (direction) where the data is <b>most spread out</b> — that direction is <b>PC1</b>; the next best, at 90°, is <b>PC2</b>.</div>
+  <p><b>Why use it?</b> Faster models, less noise, and you can draw high-dimensional data on a 2-D chart.</p>
+  <a class="watch" href="ML_DL_Animations.html#pca">🎬 Watch: PCA finding the best direction</a>
+  <details class="deep"><summary>🧮 Maths &amp; code</summary>
+    <div class="flow"><span>Standardise</span><b>→</b><span>Covariance matrix</span><b>→</b><span>Eigenvectors &amp; eigenvalues</span><b>→</b><span>Keep the top k</span><b>→</b><span>Project</span></div>
+    <div class="formula">Information kept by PCᵢ = λᵢ / Σ λ</div>
+<pre><span class="k">from</span> sklearn.decomposition <span class="k">import</span> PCA
+pca = PCA(n_components=<span class="n">2</span>).fit(X)
+print(pca.explained_variance_ratio_)   <span class="c"># e.g. [0.72 0.18] → 90% info kept</span>
+X_2d = pca.transform(X)</pre>
+  </details>
+</div>
+
+<div class="card algo u">
+  <h3>⑤ Association Rules — “people who bought this also bought…”</h3>
+  <p>100 shopping bills: 40 have bread 🍞, 25 have butter 🧈, 20 have both.</p>
+  <ul>
+    <li><b>Support</b> — how common is the pair? 20 / 100 = <b>20%</b> of bills.</li>
+    <li><b>Confidence</b> — if someone buys bread, how often do they buy butter? 20 / 40 = <b>50%</b>.</li>
+    <li><b>Lift</b> — is it more than chance? 50% ÷ 25% = <b>2</b> → twice as likely as normal. ✅ Put them on the same shelf!</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Supervised vs Unsupervised — side by side</h3>
+  <table>
+    <tr><th></th><th><span class="pill p-sup">Supervised</span></th><th><span class="pill p-uns">Unsupervised</span></th></tr>
+    <tr><td>Data</td><td>With answers (labels)</td><td>No answers</td></tr>
+    <tr><td>Goal</td><td>Predict the answer</td><td>Find groups / patterns</td></tr>
+    <tr><td>Like…</td><td>Studying with an answer key</td><td>Sorting toys with no names</td></tr>
+    <tr><td>Checking results</td><td>Easy — compare with real answers</td><td>Harder — needs human judgement</td></tr>
+    <tr><td>Examples</td><td>Linear Regression, KNN, Decision Tree</td><td>K-Means, Hierarchical, PCA</td></tr>
+  </table>
+</div>
+
+<!-- ============ NEURAL NETS ============ -->
+<h2 id="nn" class="dl">🧠 6. Neural Networks — the heart of Deep Learning</h2>
+<div class="card">
+  <div class="one">💡 <b>In one line:</b> Many tiny calculators (<b>neurons</b>) connected in <b>layers</b>. Each one weighs its inputs and passes a result on. Together they can learn very complex patterns.</div>
+  <div class="grid2">
+    <div>
+      <h3>One neuron = a judge weighing evidence ⚖️</h3>
+      <p>Should I go out to play? 🏏</p>
+      <ul><li>Is it sunny? (important → <b>big weight</b>)</li><li>Is homework done? (important → <b>big weight</b>)</li><li>Is my friend coming? (less important → <b>small weight</b>)</li></ul>
+      <p>Multiply each answer by its importance, add them up — if the total is high enough, the neuron says <b>“YES!”</b> (it “fires”).</p>
+    </div>
+    <svg viewBox="0 0 300 180">
+      <g font-size="12"><circle cx="40" cy="40" r="18" fill="#dbeafe" stroke="#2563eb"/><text x="40" y="44" text-anchor="middle">☀️</text>
+      <circle cx="40" cy="90" r="18" fill="#dbeafe" stroke="#2563eb"/><text x="40" y="94" text-anchor="middle">📘</text>
+      <circle cx="40" cy="140" r="18" fill="#dbeafe" stroke="#2563eb"/><text x="40" y="144" text-anchor="middle">🧑</text>
+      <line x1="58" y1="44" x2="140" y2="84" stroke="#64748b" stroke-width="4"/><line x1="58" y1="90" x2="140" y2="90" stroke="#64748b" stroke-width="4"/><line x1="58" y1="136" x2="140" y2="96" stroke="#64748b" stroke-width="1.5"/>
+      <text x="85" y="52" fill="#9333ea">big</text><text x="85" y="84" fill="#9333ea">big</text><text x="80" y="134" fill="#9333ea">small</text>
+      <circle cx="170" cy="90" r="30" fill="#f3e8ff" stroke="#9333ea" stroke-width="2"/><text x="170" y="86" text-anchor="middle">add up</text><text x="170" y="102" text-anchor="middle">&amp; decide</text>
+      <line x1="200" y1="90" x2="255" y2="90" stroke="#64748b" marker-end="url(#ar)"/><text x="262" y="94">YES</text></g>
+      <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#64748b"/></marker></defs>
+    </svg>
+  </div>
+  <h3>Layers</h3>
+  <div class="flow"><span>📥 <b>Input layer</b> — the raw data (pixels, words, numbers)</span><b>→</b><span>🔄 <b>Hidden layers</b> — find patterns (edges → shapes → faces)</span><b>→</b><span>📤 <b>Output layer</b> — the answer (“Cat 92%”)</span></div>
+  <p>“<b>Deep</b>” learning simply means <b>many hidden layers</b>.</p>
+  <h3>How a network learns — 4 steps, repeated thousands of times</h3>
+  <table>
+    <tr><th>Step</th><th>Name</th><th>Simple meaning</th></tr>
+    <tr><td>1</td><td><b>Forward pass</b></td><td>Data flows through the layers → the network makes a guess</td></tr>
+    <tr><td>2</td><td><b>Loss</b></td><td>Measure how wrong the guess was</td></tr>
+    <tr><td>3</td><td><b>Backpropagation</b></td><td>Send the blame backwards — find which weights caused the mistake</td></tr>
+    <tr><td>4</td><td><b>Update</b></td><td>Nudge every weight a little to reduce the mistake</td></tr>
+  </table>
+  <div class="think">⚽ <b>Like learning to take a penalty:</b> kick (forward pass) → see how far you missed (loss) → figure out what went wrong — foot angle? power? (backprop) → adjust next time (update).</div>
+  <a class="watch" href="ML_DL_Animations.html#nn">🎬 Watch: a network learning Cat vs Dog</a>
+  <h3>Common types of neural networks</h3>
+  <table>
+    <tr><th>Type</th><th>Best for</th><th>Key idea in simple words</th></tr>
+    <tr><td><b>ANN / MLP</b></td><td>Table data</td><td>Basic layers of neurons</td></tr>
+    <tr><td><b>CNN</b></td><td>Images 🖼️</td><td>Small filters scan the image for edges, shapes, objects</td></tr>
+    <tr><td><b>RNN / LSTM</b></td><td>Sequences 📝 (text, speech, stock prices)</td><td>Reads in order and remembers what came before</td></tr>
+    <tr><td><b>Transformer</b></td><td>Text and almost everything today 🤖</td><td>Every word looks at every other word at once (attention)</td></tr>
+  </table>
+  <details class="deep"><summary>🧮 Maths &amp; code</summary>
+    <div class="formula">Neuron: output = f( w₁x₁ + w₂x₂ + … + b )</div>
+    <table>
+      <tr><th>Activation f</th><th>What it does</th><th>Used in</th></tr>
+      <tr><td>ReLU</td><td>Negative → 0, positive → unchanged</td><td>Hidden layers (default)</td></tr>
+      <tr><td>Sigmoid</td><td>Squeezes to 0 … 1</td><td>Yes/no output, LSTM gates</td></tr>
+      <tr><td>Tanh</td><td>Squeezes to −1 … 1</td><td>RNN / LSTM memory</td></tr>
+      <tr><td>Softmax</td><td>Turns scores into percentages that add to 100%</td><td>Multi-class output, attention</td></tr>
+    </table>
+<pre><span class="k">import</span> tensorflow <span class="k">as</span> tf
+model = tf.keras.Sequential([
+    tf.keras.layers.Input(shape=(<span class="n">30</span>,)),
+    tf.keras.layers.Dense(<span class="n">64</span>, activation=<span class="s">"relu"</span>),      <span class="c"># hidden layer 1</span>
+    tf.keras.layers.Dense(<span class="n">32</span>, activation=<span class="s">"relu"</span>),      <span class="c"># hidden layer 2</span>
+    tf.keras.layers.Dense(<span class="n">1</span>, activation=<span class="s">"sigmoid"</span>),    <span class="c"># yes / no output</span>
+])
+model.compile(optimizer=<span class="s">"adam"</span>, loss=<span class="s">"binary_crossentropy"</span>, metrics=[<span class="s">"accuracy"</span>])
+model.fit(X_train, y_train, epochs=<span class="n">30</span>, validation_split=<span class="n">0.2</span>)</pre>
+  </details>
+</div>
+
+<!-- ============ RNN ============ -->
+<h2 id="rnn" class="rnn">🔁 7. RNN — Recurrent Neural Network</h2>
+<div class="card">
+  <div class="one">💡 <b>In one line:</b> A neural network that reads data <b>one piece at a time, in order</b>, and keeps a small <b>memory</b> of what it has read so far.</div>
+  <div class="life">📖 <b>Why do we need it?</b> In language, <b>order matters</b>: “Dog bites man” ≠ “Man bites dog”. A normal network looks at everything at once and ignores order. An RNN reads like we do — word by word — and remembers the story so far.</div>
+  <svg viewBox="0 0 700 190">
+    <defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#ea580c"/></marker></defs>
+    <g font-size="13" text-anchor="middle">
+      <rect x="20" y="70" width="70" height="50" rx="10" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/><text x="55" y="100">RNN</text>
+      <path d="M75 70 C 95 30, 15 30, 35 68" fill="none" stroke="#ea580c" stroke-width="2" marker-end="url(#ar2)"/>
+      <text x="125" y="100" font-size="22">=</text>
+      <rect x="160" y="70" width="70" height="50" rx="10" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/><text x="195" y="100">RNN</text>
+      <rect x="290" y="70" width="70" height="50" rx="10" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/><text x="325" y="100">RNN</text>
+      <rect x="420" y="70" width="70" height="50" rx="10" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/><text x="455" y="100">RNN</text>
+      <rect x="550" y="70" width="70" height="50" rx="10" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/><text x="585" y="100">RNN</text>
+      <line x1="230" y1="95" x2="288" y2="95" stroke="#ea580c" stroke-width="2" marker-end="url(#ar2)"/><text x="259" y="88" font-size="11">memory</text>
+      <line x1="360" y1="95" x2="418" y2="95" stroke="#ea580c" stroke-width="2" marker-end="url(#ar2)"/><text x="389" y="88" font-size="11">memory</text>
+      <line x1="490" y1="95" x2="548" y2="95" stroke="#ea580c" stroke-width="2" marker-end="url(#ar2)"/><text x="519" y="88" font-size="11">memory</text>
+      <text x="195" y="172">"I"</text><text x="325" y="172">"love"</text><text x="455" y="172">"deep"</text><text x="585" y="172">"learning"</text>
+      <line x1="195" y1="158" x2="195" y2="122" stroke="#ea580c" marker-end="url(#ar2)"/><line x1="325" y1="158" x2="325" y2="122" stroke="#ea580c" marker-end="url(#ar2)"/>
+      <line x1="455" y1="158" x2="455" y2="122" stroke="#ea580c" marker-end="url(#ar2)"/><line x1="585" y1="158" x2="585" y2="122" stroke="#ea580c" marker-end="url(#ar2)"/>
+      <text x="55" y="150" font-size="11" fill="#64748b">loop = memory</text><text x="390" y="40" font-size="12" fill="#64748b">the same cell, drawn once per word (“unrolled”)</text>
+    </g>
+  </svg>
+  <p><b>🪜 Steps:</b> read word 1 → update memory → read word 2 + memory → update memory → … → the final memory is a summary of the whole sentence.</p>
+  <p><b>Used for:</b> next-word suggestions on your phone keyboard, sentiment (positive/negative review), speech recognition, stock-price forecasting.</p>
+  <div class="warn">⚠️ <b>The big problem — short memory.</b> Like the game <b>“Chinese whispers”</b> 🗣️: a message passed through many people slowly gets lost. In an RNN, information from early words <b>fades</b> step after step. While learning, the correction signal also shrinks as it travels back — this is called the <b>vanishing gradient</b> problem. So RNNs forget long sentences. ➡️ Solution: <b>LSTM</b>.</div>
+  <a class="watch" href="ML_DL_Animations.html#rnn">🎬 Watch: RNN reading a sentence (type your own!)</a>
+  <details class="deep"><summary>🧮 Maths &amp; code</summary>
+    <div class="formula">hₜ = tanh( Wₓ·xₜ + Wₕ·hₜ₋₁ + b ) &nbsp;&nbsp; (hₜ = memory after word t)</div>
+    <p>Tiny example (wₓ = 0.5, wₕ = 0.8, inputs 1, 0, 0): h₁ = tanh(0.5) = 0.46 → h₂ = tanh(0.8 × 0.46) = 0.35 → h₃ = 0.28. The memory of the first input keeps shrinking.</p>
+<pre>model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(input_dim=<span class="n">10000</span>, output_dim=<span class="n">64</span>),  <span class="c"># word → numbers</span>
+    tf.keras.layers.SimpleRNN(<span class="n">64</span>),                              <span class="c"># reads word by word</span>
+    tf.keras.layers.Dense(<span class="n">1</span>, activation=<span class="s">"sigmoid"</span>),           <span class="c"># positive / negative</span>
+])</pre>
+  </details>
+</div>
+
+<!-- ============ LSTM ============ -->
+<h2 id="lstm" class="rnn">🧮 8. LSTM — Long Short-Term Memory</h2>
+<div class="card">
+  <div class="one">💡 <b>In one line:</b> An RNN with a <b>smart memory</b>: a long-term “memory belt” plus 3 <b>gates</b> that decide what to forget, what to write and what to use.</div>
+  <div class="life">📓 <b>Notebook example:</b> While reading a long story you keep a notebook. You use an <b>eraser</b> 🗑️ to remove facts that are no longer true, a <b>pen</b> ✍️ to write down new important facts, and you <b>read out</b> 📤 only the facts needed to answer a question.</div>
+  <table>
+    <tr><th>Part</th><th>Notebook version</th><th>Question it answers</th></tr>
+    <tr><td>🧠 <b>Cell state</b> (memory belt)</td><td>The notebook</td><td>What do I know so far?</td></tr>
+    <tr><td>🗑️ <b>Forget gate</b></td><td>The eraser</td><td>Which old facts should I erase?</td></tr>
+    <tr><td>✍️ <b>Input gate</b></td><td>The pen</td><td>Which new facts should I write?</td></tr>
+    <tr><td>📤 <b>Output gate</b></td><td>Reading out loud</td><td>What should I use right now?</td></tr>
+  </table>
+  <p>Each gate is like a <b>tap</b>: 0% = closed, 100% = fully open. The network <b>learns</b> when to open and close each tap.</p>
+  <h3>Story example</h3>
+  <p>“<i>Ravi plays cricket. Priya loves music. Then ___</i>”</p>
+  <div class="flow"><span><b>Ravi</b> → ✍️ write “person = Ravi (he)”</span><b>→</b><span><b>Priya</b> → 🗑️ erase Ravi, ✍️ write “person = Priya (she)”</span><b>→</b><span><b>Then</b> → 📤 read the person → predict “<b>she</b>” ✅</span></div>
+  <div class="remember"><b>Why is it better than RNN?</b> Important facts sit safely on the memory belt and are not squashed at every step. They stay until the forget gate removes them — so an LSTM can remember things for <b>hundreds of words</b>.</div>
+  <p><b>GRU</b> (Gated Recurrent Unit) = a lighter, faster LSTM with only 2 gates. Works almost as well.</p>
+  <p><b>Used for:</b> time-series forecasting (sales, weather, stock prices), speech recognition, older translation systems, handwriting recognition.</p>
+  <a class="watch" href="ML_DL_Animations.html#lstm">🎬 Watch: LSTM gates in action</a>
+  <details class="deep"><summary>🧮 Maths &amp; code</summary>
+    <div class="formula" style="text-align:left;line-height:2">
+      fₜ = σ(W<sub>f</sub>·[hₜ₋₁, xₜ] + b<sub>f</sub>) &nbsp;← forget gate<br>
+      iₜ = σ(W<sub>i</sub>·[hₜ₋₁, xₜ] + b<sub>i</sub>) &nbsp;← input gate<br>
+      C̃ₜ = tanh(W<sub>C</sub>·[hₜ₋₁, xₜ] + b<sub>C</sub>) &nbsp;← new candidate memory<br>
+      <b>Cₜ = fₜ ⊙ Cₜ₋₁ + iₜ ⊙ C̃ₜ</b> &nbsp;← update the memory belt<br>
+      oₜ = σ(W<sub>o</sub>·[hₜ₋₁, xₜ] + b<sub>o</sub>) &nbsp;← output gate<br>
+      <b>hₜ = oₜ ⊙ tanh(Cₜ)</b> &nbsp;← short-term memory / output
+    </div>
+    <p>σ (sigmoid) gives 0…1 → perfect for a “tap”. ⊙ = multiply element by element. The memory is updated by <b>adding</b>, which is why the learning signal doesn’t vanish.</p>
+<pre><span class="c"># Time-series: use the last 30 days to predict the next day</span>
+model = tf.keras.Sequential([
+    tf.keras.layers.Input(shape=(<span class="n">30</span>, <span class="n">1</span>)),   <span class="c"># 30 time steps, 1 feature</span>
+    tf.keras.layers.LSTM(<span class="n">50</span>),
+    tf.keras.layers.Dense(<span class="n">1</span>),
+])
+model.compile(optimizer=<span class="s">"adam"</span>, loss=<span class="s">"mse"</span>)</pre>
+  </details>
+</div>
+
+<!-- ============ TRANSFORMER ============ -->
+<h2 id="tf" class="tf">⚡ 9. Transformers &amp; Attention — the tech behind ChatGPT</h2>
+<div class="card">
+  <div class="one">💡 <b>In one line:</b> A Transformer reads <b>all the words at the same time</b>, and every word uses <b>attention</b> to look at every other word to understand its meaning.</div>
+  <h3>Why was it invented? Two problems with RNN / LSTM</h3>
+  <div class="grid2">
+    <div class="warn">🐢 <b>Slow:</b> they read one word after another — like <b>one cashier</b> serving a long queue. Can’t use the full power of GPUs.</div>
+    <div class="warn">🧠 <b>Forgetful:</b> information from early words still fades over very long texts.</div>
+  </div>
+  <div class="life">🚀 <b>Transformer fix:</b> open <b>a counter for every customer</b> (process all words in parallel) and let any word <b>directly</b> look at any other word.</div>
+  <p>Introduced by Google in 2017 in the paper <b>“Attention Is All You Need”</b>. Today it powers <b>ChatGPT, Gemini, Claude, LLaMA, BERT, Google Translate</b> and more.</p>
+  <a class="watch" href="ML_DL_Animations.html#race">🎬 Watch: RNN vs Transformer race</a>
+</div>
+
+<div class="card algo t">
+  <h3>Attention — the key idea</h3>
+  <div class="life">🖍️ <b>Like a highlighter:</b> when you read a sentence, you automatically “highlight” the words that help you understand the current word.</div>
+  <p>“The <b>animal</b> didn’t cross the street because <b>it</b> was too tired.” → What is <b>it</b>? Attention makes “it” focus mostly on “<b>animal</b>”. Change “tired” to “wide” and “it” focuses on “<b>street</b>” instead. <b>Same word, different meaning — decided by context.</b></p>
+  <h3>Query, Key, Value — explained with a YouTube search 🔎</h3>
+  <table>
+    <tr><th>Name</th><th>YouTube version</th><th>In the sentence</th></tr>
+    <tr><td><b>Query (Q)</b></td><td>What you type in the search box</td><td>“it” asks: <i>who am I talking about?</i></td></tr>
+    <tr><td><b>Key (K)</b></td><td>Video titles and tags</td><td>Each word’s label: “animal” = <i>living thing</i>, “street” = <i>place</i></td></tr>
+    <tr><td><b>Value (V)</b></td><td>The actual video you watch</td><td>The information each word passes on</td></tr>
+  </table>
+  <p><b>🪜 Steps:</b></p>
+  <ol>
+    <li>Compare the <b>Query</b> with every <b>Key</b> → a match score for each word.</li>
+    <li>Turn the scores into <b>percentages</b> that add up to 100% (softmax). E.g. animal 53%, tired 13%, street 7%…</li>
+    <li>Mix the <b>Values</b> using those percentages → the new, context-aware meaning of “it”.</li>
+  </ol>
+  <p><b>Self-attention</b> = every word does this <b>at the same time</b>. <b>Multi-head attention</b> = several attention “heads” run side by side — one may track grammar, another who-did-what, another nearby words.</p>
+  <a class="watch" href="ML_DL_Animations.html#attention">🎬 Watch: attention visualiser (click any word!)</a>
+  <details class="deep"><summary>🧮 The attention formula with a worked example</summary>
+    <div class="formula" style="font-size:1.25rem">Attention(Q, K, V) = softmax( Q · Kᵀ / √dₖ ) · V</div>
+    <p>Query for “it” = [1, 0]. Keys: animal = [2, 0], street = [0, 1], tired = [1, 1]. dₖ = 2.</p>
+    <table>
+      <tr><th>Word</th><th>Q·K (match)</th><th>÷ √2</th><th>softmax (%)</th></tr>
+      <tr><td>animal</td><td>2</td><td>1.41</td><td><b>58%</b></td></tr>
+      <tr><td>street</td><td>0</td><td>0</td><td>14%</td></tr>
+      <tr><td>tired</td><td>1</td><td>0.71</td><td>28%</td></tr>
+    </table>
+    <p>Dividing by √dₖ keeps the numbers from getting too large (which would make softmax give ~100% to one word and stop learning).</p>
+<pre><span class="k">import</span> numpy <span class="k">as</span> np
+<span class="k">def</span> softmax(x):
+    e = np.exp(x - x.max(axis=-<span class="n">1</span>, keepdims=<span class="n">True</span>)); <span class="k">return</span> e / e.sum(axis=-<span class="n">1</span>, keepdims=<span class="n">True</span>)
+
+<span class="k">def</span> self_attention(X, Wq, Wk, Wv):
+    Q, K, V = X @ Wq, X @ Wk, X @ Wv
+    weights = softmax(Q @ K.T / np.sqrt(K.shape[-<span class="n">1</span>]))   <span class="c"># each row adds up to 1</span>
+    <span class="k">return</span> weights @ V, weights</pre>
+  </details>
+</div>
+
+<div class="card algo t">
+  <h3>Inside a Transformer: Encoder + Decoder</h3>
+  <div class="life">🧑‍💼 <b>Like a human translator:</b> first <b>read and understand</b> the whole English sentence (<b>Encoder</b> 📖), then <b>write</b> the Hindi sentence word by word, glancing back at the important English words each time (<b>Decoder</b> ✍️).</div>
+  <div class="flow"><span>“I am a student”</span><b>→</b><span>✂️ Split into tokens</span><b>→</b><span>🔢 Words → numbers (embeddings) + position</span><b>→</b><span>📖 Encoder (self-attention)</span><b>→</b><span>✍️ Decoder writes one word at a time</span><b>→</b><span>“मैं एक छात्र हूँ”</span></div>
+  <ul>
+    <li><b>Embedding</b> — each word becomes a list of numbers (computers only understand numbers).</li>
+    <li><b>Positional encoding</b> — adds “I am word 1, 2, 3…”, because attention alone doesn’t know word order.</li>
+    <li><b>Encoder</b> — all words look at each other and build a rich understanding.</li>
+    <li><b>Decoder</b> — predicts the next word, looking only at words already written (no peeking at the future) and back at the encoder.</li>
+  </ul>
+  <a class="watch" href="ML_DL_Animations.html#transformer">🎬 Watch: Transformer translating into Hindi</a>
+  <h3>Famous Transformer families</h3>
+  <table>
+    <tr><th>Type</th><th>Simple idea</th><th>Examples</th><th>Good at</th></tr>
+    <tr><td><b>Encoder only</b></td><td>Reads and understands</td><td>BERT</td><td>Classifying text, search, finding names in text</td></tr>
+    <tr><td><b>Decoder only</b></td><td>Keeps predicting the next word</td><td>GPT, ChatGPT, LLaMA, Gemini</td><td>Writing, chatting, coding</td></tr>
+    <tr><td><b>Encoder + Decoder</b></td><td>Read, then write</td><td>T5, original Transformer</td><td>Translation, summarising</td></tr>
+  </table>
+  <details class="deep"><summary>🐍 Try a Transformer in 3 lines (Hugging Face)</summary>
+<pre><span class="k">from</span> transformers <span class="k">import</span> pipeline
+print(pipeline(<span class="s">"sentiment-analysis"</span>)(<span class="s">"I love this course!"</span>))
+print(pipeline(<span class="s">"text-generation"</span>, model=<span class="s">"gpt2"</span>)(<span class="s">"Deep learning is"</span>, max_new_tokens=<span class="n">20</span>))
+print(pipeline(<span class="s">"fill-mask"</span>, model=<span class="s">"bert-base-uncased"</span>)(<span class="s">"Paris is the [MASK] of France."</span>))</pre>
+  </details>
+</div>
+
+<!-- ============ COMPARE ============ -->
+<h2 id="compare">🆚 10. Quick Comparisons</h2>
+<div class="card">
+  <h3>RNN vs LSTM vs Transformer</h3>
+  <table>
+    <tr><th></th><th>RNN</th><th>LSTM</th><th>Transformer</th></tr>
+    <tr><td>How it reads</td><td>One word at a time</td><td>One word at a time</td><td><b>All words at once</b></td></tr>
+    <tr><td>Memory</td><td>Short (forgets)</td><td>Long (memory belt + gates)</td><td>Looks directly at every word</td></tr>
+    <tr><td>Speed of training</td><td>Slow</td><td>Slower</td><td><b>Fast</b> (parallel on GPU)</td></tr>
+    <tr><td>Analogy</td><td>Reading with a weak memory</td><td>Reading with a notebook</td><td>Seeing the whole page and highlighting</td></tr>
+    <tr><td>Used today in</td><td>Teaching, tiny devices</td><td>Time series, sensors</td><td>ChatGPT, translation, almost everything</td></tr>
+  </table>
+  <h3>Machine Learning vs Deep Learning</h3>
+  <table>
+    <tr><th></th><th>Classical ML</th><th>Deep Learning</th></tr>
+    <tr><td>Data needed</td><td>Small to medium</td><td>Large</td></tr>
+    <tr><td>Who finds the features?</td><td>Humans choose them</td><td>The network learns them</td></tr>
+    <tr><td>Computer needed</td><td>Normal laptop (CPU)</td><td>GPU</td></tr>
+    <tr><td>Easy to explain?</td><td>Yes (trees, lines)</td><td>Harder (“black box”)</td></tr>
+    <tr><td>Best for</td><td>Excel / table data</td><td>Images, text, speech</td></tr>
+  </table>
+  <h3>🧭 Which algorithm should I use?</h3>
+  <ul>
+    <li>Have answers + want a <b>number</b> → Linear Regression, then Random Forest / XGBoost.</li>
+    <li>Have answers + want a <b>category</b> → Logistic Regression, then Random Forest / XGBoost.</li>
+    <li><b>No answers</b>, want groups → K-Means (round groups) · DBSCAN (odd shapes) · Hierarchical (want a tree).</li>
+    <li>Too many columns → PCA.</li>
+    <li>Images → CNN · Time series → LSTM · Text / language → Transformer.</li>
+  </ul>
+</div>
+
+<!-- ============ QUIZ ============ -->
+<h2 id="quiz">📝 11. Quick Quiz <span id="score"></span></h2>
+<div class="card quiz" id="quizBox"></div>
+
+<div class="card">
+  <h3>🎤 Interview / Viva questions — with simple answers</h3>
+  <details><summary>What is Machine Learning?</summary>Teaching computers to learn patterns from examples instead of writing every rule by hand.</details>
+  <details><summary>Difference between supervised and unsupervised learning?</summary>Supervised learns from data <b>with answers</b> (labels) to predict answers. Unsupervised has <b>no answers</b> and finds groups or patterns by itself.</details>
+  <details><summary>Regression vs classification?</summary>Regression predicts a number (price, temperature). Classification predicts a category (spam / not spam).</details>
+  <details><summary>What is overfitting and how do you prevent it?</summary>The model memorises the training data and fails on new data. Prevent it with more data, a simpler model, stopping training early, or regularisation/dropout.</details>
+  <details><summary>Why do we split data into train and test?</summary>To check the model on data it has never seen — like a final exam with new questions.</details>
+  <details><summary>Precision vs recall?</summary>Precision: when the model says “yes”, how often is it right? Recall: of all real “yes” cases, how many did it find? Cancer screening needs high recall; a spam filter needs high precision.</details>
+  <details><summary>How does K-Means work, and how do you choose K?</summary>Pick K random centres → each point joins the nearest centre → centres move to the middle of their points → repeat. Choose K with the Elbow method (look for the bend in the curve).</details>
+  <details><summary>What is a neuron in a neural network?</summary>A tiny calculator: multiply each input by its weight, add them up, and pass the result through an activation function.</details>
+  <details><summary>What is backpropagation?</summary>After a wrong guess, the error is sent backwards through the network to find how much each weight was to blame, so every weight can be adjusted.</details>
+  <details><summary>What is the vanishing gradient problem?</summary>In a long RNN the learning signal gets smaller and smaller as it travels back through many steps, so early words barely learn. LSTM and Transformers solve this.</details>
+  <details><summary>What are the three gates of an LSTM?</summary>Forget gate (what to erase), input gate (what to write), output gate (what to use now).</details>
+  <details><summary>What is attention? What are Q, K, V?</summary>Attention lets each word decide how much to focus on every other word. Query = what I’m looking for, Key = what each word offers, Value = the information it gives.</details>
+  <details><summary>Why did Transformers replace RNNs?</summary>They process all words in parallel (much faster on GPUs) and connect any two words directly (better long-range understanding).</details>
+  <details><summary>BERT vs GPT?</summary>BERT = encoder-only, reads in both directions, great for understanding. GPT = decoder-only, predicts the next word, great for generating text.</details>
+</div>
+
+<!-- ============ REVISION ============ -->
+<h2 id="cheat">📌 12. One-Page Revision</h2>
+<div class="card">
+  <table>
+    <tr><th>Topic</th><th>Remember in one line</th></tr>
+    <tr><td>Machine Learning</td><td>Data + answers → the computer finds the rules</td></tr>
+    <tr><td>Supervised</td><td>Learning with answers → predict answers</td></tr>
+    <tr><td>Unsupervised</td><td>No answers → find groups &amp; patterns</td></tr>
+    <tr><td>Regression / Classification</td><td>Predict a number / predict a category</td></tr>
+    <tr><td>Linear Regression</td><td>Best straight line through the dots</td></tr>
+    <tr><td>KNN</td><td>Ask the K nearest neighbours and take a vote</td></tr>
+    <tr><td>Decision Tree</td><td>Flowchart of yes/no questions</td></tr>
+    <tr><td>Random Forest</td><td>Many trees voting together</td></tr>
+    <tr><td>Overfitting</td><td>Memorised, didn’t understand</td></tr>
+    <tr><td>Precision / Recall</td><td>Avoid false alarms / avoid missing real cases</td></tr>
+    <tr><td>K-Means</td><td>Join the nearest captain, captain moves to the middle, repeat</td></tr>
+    <tr><td>Hierarchical</td><td>Keep joining the closest groups → family tree</td></tr>
+    <tr><td>PCA</td><td>Fewer features, most information kept</td></tr>
+    <tr><td>Neural network</td><td>Layers of neurons: guess → measure error → blame backwards → adjust</td></tr>
+    <tr><td>RNN</td><td>Reads in order with a short memory</td></tr>
+    <tr><td>LSTM</td><td>RNN + memory belt + forget / input / output gates</td></tr>
+    <tr><td>Attention</td><td>Each word highlights the words that matter to it</td></tr>
+    <tr><td>Transformer</td><td>All words at once + attention; Encoder reads, Decoder writes</td></tr>
+  </table>
+  <details class="deep"><summary>🧮 Formula sheet</summary>
+    <table>
+      <tr><td>Linear regression</td><td>ŷ = w·x + b</td></tr>
+      <tr><td>Mean squared error</td><td>(1/n) Σ (y − ŷ)²</td></tr>
+      <tr><td>Gradient descent</td><td>w ← w − α · ∂Loss/∂w</td></tr>
+      <tr><td>Sigmoid</td><td>1 / (1 + e<sup>−z</sup>)</td></tr>
+      <tr><td>Gini</td><td>1 − Σ p²</td></tr>
+      <tr><td>Precision · Recall · F1</td><td>TP/(TP+FP) · TP/(TP+FN) · 2PR/(P+R)</td></tr>
+      <tr><td>Neuron</td><td>f(Σ wx + b)</td></tr>
+      <tr><td>Softmax</td><td>e<sup>zᵢ</sup> / Σ e<sup>zⱼ</sup></td></tr>
+      <tr><td>RNN</td><td>hₜ = tanh(Wₓxₜ + Wₕhₜ₋₁ + b)</td></tr>
+      <tr><td>LSTM</td><td>Cₜ = fₜ⊙Cₜ₋₁ + iₜ⊙C̃ₜ, &nbsp; hₜ = oₜ⊙tanh(Cₜ)</td></tr>
+      <tr><td>Attention</td><td>softmax(QKᵀ/√dₖ)·V</td></tr>
+    </table>
+  </details>
+</div>
+
+</main>
+<footer>Vision Shiksha Academy · Machine Learning &amp; Deep Learning — Made Easy · Watch every topic in the <a href="ML_DL_Animations.html">Animated Lab</a> and practise the code in Google Colab!</footer>
+
+<script>
+const QUIZ=[
+ ["Predicting tomorrow’s temperature (°C) is…",["Classification","Regression","Clustering"],1,"The answer is a number → regression."],
+ ["Deciding if an email is spam or not is…",["Classification","Regression","Clustering"],0,"The answer is a category (spam / not spam) → classification."],
+ ["Which one does NOT need labels (answers)?",["Decision Tree","K-Means","Linear Regression"],1,"K-Means finds groups by itself — unsupervised."],
+ ["A model scores 99% on practice data but 60% on new data. It is…",["Underfitting","Overfitting","Perfect"],1,"It memorised the practice data instead of learning the pattern."],
+ ["In KNN, what does K mean?",["Number of groups","Number of neighbours that vote","Number of layers"],1,"K = how many nearest neighbours vote."],
+ ["For a cancer test, which score matters most?",["Precision","Recall","Accuracy"],1,"Missing a real cancer case is the worst mistake → recall."],
+ ["The Elbow method helps us choose…",["K in K-Means","The learning rate","The test size"],0,"Look for the bend in the spread-vs-K curve."],
+ ["PCA is mainly used to…",["Reduce the number of features","Label data","Make predictions"],0,"Fewer features, most of the information kept."],
+ ["In a neural network, ‘backpropagation’ means…",["Sending blame backwards to fix the weights","Reading data backwards","Deleting layers"],0,"It finds how much each weight caused the error."],
+ ["The main weakness of a simple RNN is…",["It is too accurate","Short memory (vanishing gradient)","It can’t read text"],1,"Early words fade as the sentence gets longer."],
+ ["Which LSTM gate decides what to erase?",["Input gate","Forget gate","Output gate"],1,"The forget gate is the eraser."],
+ ["In attention, the ‘Query’ is…",["What a word is looking for","The final answer","The word’s position"],0,"Like the text you type into a search box."],
+ ["Why are Transformers faster to train than RNNs?",["Fewer words","They read all words in parallel","They don’t use numbers"],1,"No waiting for the previous word — everything runs at once on the GPU."],
+ ["ChatGPT is based on a…",["Decoder-only Transformer","Decision Tree","K-Means model"],0,"GPT keeps predicting the next word using a decoder-only Transformer."]
+];
+let answered=0,correct=0;
+const box=document.getElementById('quizBox');
+QUIZ.forEach(([q,opts,ans,why],i)=>{
+  const d=document.createElement('div');d.className='q';
+  d.innerHTML=`<b>Q${i+1}. ${q}</b><div class="opts"></div><div class="why">💡 ${why}</div>`;
+  const o=d.querySelector('.opts');
+  opts.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{
+    if(d.dataset.done)return;d.dataset.done=1;answered++;
+    if(j===ans){b.classList.add('right');correct++;}else{b.classList.add('wrong');o.children[ans].classList.add('right');}
+    d.querySelector('.why').classList.add('show');
+    document.getElementById('score').textContent=`— Score ${correct}/${answered}`;};o.appendChild(b);});
+  box.appendChild(d);
+});
+const expBtn=document.getElementById('expAll');let expOpen=false;
+expBtn.onclick=()=>{expOpen=!expOpen;document.querySelectorAll('details.deep').forEach(d=>d.open=expOpen);expBtn.textContent=expOpen?'🙈 Hide maths & code':'🎓 Show all maths & code'};
+</script>
+</body>
+</html>
